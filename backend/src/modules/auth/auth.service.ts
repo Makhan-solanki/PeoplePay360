@@ -38,7 +38,7 @@ export class AuthService {
       data: {
         email: input.email,
         password: hashedPassword,
-        role: Role.USER,
+        role: Role.EMPLOYEE,
       },
       select: {
         id: true,
@@ -65,6 +65,18 @@ export class AuthService {
   async login(input: LoginInput) {
     const user = await prisma.user.findUnique({
       where: { email: input.email },
+      include: {
+        employee: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            department: true,
+            jobPosition: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -91,6 +103,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
+        employee: user.employee,
       },
       tokens,
     };
@@ -156,6 +169,16 @@ export class AuthService {
         role: true,
         createdAt: true,
         updatedAt: true,
+        employee: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            department: true,
+            jobPosition: true,
+          },
+        },
       },
     });
 

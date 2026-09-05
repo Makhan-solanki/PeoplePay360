@@ -9,6 +9,7 @@ export const createContractSchema = z.object({
   department: z.string().min(1, 'Department is required'),
   jobPosition: z.string().min(1, 'Job position is required'),
   salaryStructureId: z.string().min(1, 'Salary structure ID is required'),
+  workingScheduleId: z.string().optional().nullable(),
   status: z.enum(['DRAFT', 'ACTIVE', 'CLOSED']).default('ACTIVE'),
 });
 

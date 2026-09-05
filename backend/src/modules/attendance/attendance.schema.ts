@@ -18,5 +18,13 @@ export const attendanceQuerySchema = z.object({
   endDate: z.string().optional(),
 });
 
+export const updateAttendanceSchema = z.object({
+  checkIn: z.string().datetime().optional(),
+  checkOut: z.string().datetime().nullable().optional(),
+  status: z.enum(['PRESENT', 'ABSENT', 'HALF_DAY']).optional(),
+  notes: z.string().nullable().optional(),
+});
+
 export type CheckInInput = z.infer<typeof checkInSchema>;
 export type CheckOutInput = z.infer<typeof checkOutSchema>;
+export type UpdateAttendanceInput = z.infer<typeof updateAttendanceSchema>;

@@ -60,7 +60,7 @@ export async function submitRequest(req: Request, res: Response, next: NextFunct
 
 export async function approveRequest(req: Request, res: Response, next: NextFunction) {
   try {
-    const request = await timeOffService.approveTimeOffRequest(req.params.id);
+    const request = await timeOffService.approveTimeOffRequest(req.params.id, req.user!.id);
     res.status(200).json({
       success: true,
       data: request,
@@ -72,11 +72,38 @@ export async function approveRequest(req: Request, res: Response, next: NextFunc
 
 export async function rejectRequest(req: Request, res: Response, next: NextFunction) {
   try {
-    const request = await timeOffService.rejectTimeOffRequest(req.params.id, req.body);
+    const request = await timeOffService.rejectTimeOffRequest(req.params.id, req.user!.id, req.body);
     res.status(200).json({
       success: true,
       data: request,
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createType(req: Request, res: Response, next: NextFunction) {
+  try {
+    const type = await timeOffService.createTimeOffType(req.body);
+    res.status(201).json({ success: true, data: type });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateType(req: Request, res: Response, next: NextFunction) {
+  try {
+    const type = await timeOffService.updateTimeOffType(req.params.id, req.body);
+    res.status(200).json({ success: true, data: type });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createAllocation(req: Request, res: Response, next: NextFunction) {
+  try {
+    const allocation = await timeOffService.createAllocation(req.body);
+    res.status(201).json({ success: true, data: allocation });
   } catch (error) {
     next(error);
   }

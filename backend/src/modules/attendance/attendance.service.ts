@@ -1,7 +1,7 @@
 import { AttendanceStatus } from '@prisma/client';
 import prisma from '../../lib/prisma';
 import { BadRequestError, NotFoundError } from '../../lib/errors';
-import { CheckInInput, CheckOutInput } from './attendance.schema';
+import { CheckInInput, CheckOutInput, UpdateAttendanceInput } from './attendance.schema';
 
 export async function checkIn(data: CheckInInput) {
   const now = new Date();
@@ -113,6 +113,76 @@ export async function getAttendances(filters?: {
       },
     },
     orderBy: { date: 'desc' },
+  });
+}
+
+export async function getAttendanceById(id: string) {
+  const attendance = await prisma.attendance.findUnique({
+    where: { id },
+    include: {
+      employee: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          employeeCode: true,
+          department: true,
+          manager: { select: { firstName: true, lastName: true } },
+        },
+      },
+    },
+  });
+
+  if (!attendance) {
+    throw new NotFoundError(`Attendance record '${id}' not found`);
+  }
+
+  return attendance;
+}
+
+/**
+ * Manual correction — HR/managers can amend check-in/out timestamps, status, and notes
+ * after the fact. Worked hours are re-derived whenever both timestamps are known,
+ * never trusted as a raw input.
+ */
+export async function updateAttendance(id: string, data: UpdateAttendanceInput) {
+  const existing = await prisma.attendance.findUnique({ where: { id } });
+  if (!existing) {
+    throw new NotFoundError(`Attendance record '${id}' not found`);
+  }
+
+  const checkIn = data.checkIn ? new Date(data.checkIn) : existing.checkIn;
+  const checkOut = data.checkOut !== undefined ? (data.checkOut ? new Date(data.checkOut) : null) : existing.checkOut;
+
+  if (checkOut && checkOut < checkIn) {
+    throw new BadRequestError('Check-out must be after check-in');
+  }
+
+  let workedHours = existing.workedHours;
+  let status = data.status ? (data.status as AttendanceStatus) : existing.status;
+
+  if (checkOut) {
+    const diffMs = checkOut.getTime() - checkIn.getTime();
+    workedHours = Math.max(0, Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100);
+    if (!data.status) {
+      status = workedHours < 4 ? AttendanceStatus.HALF_DAY : AttendanceStatus.PRESENT;
+    }
+  }
+
+  return prisma.attendance.update({
+    where: { id },
+    data: {
+      checkIn,
+      checkOut,
+      workedHours,
+      status,
+      notes: data.notes !== undefined ? data.notes : existing.notes,
+    },
+    include: {
+      employee: {
+        select: { id: true, firstName: true, lastName: true, employeeCode: true, department: true },
+      },
+    },
   });
 }
 

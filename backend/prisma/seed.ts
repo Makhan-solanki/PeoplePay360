@@ -133,6 +133,122 @@ async function main() {
     ],
   });
 
+  // 2b. Seed Working Schedules
+  const weekdayNineToSix = [
+    { day: 'MONDAY', startTime: '09:00', endTime: '18:00', breakMinutes: 60, hours: 8 },
+    { day: 'TUESDAY', startTime: '09:00', endTime: '18:00', breakMinutes: 60, hours: 8 },
+    { day: 'WEDNESDAY', startTime: '09:00', endTime: '18:00', breakMinutes: 60, hours: 8 },
+    { day: 'THURSDAY', startTime: '09:00', endTime: '18:00', breakMinutes: 60, hours: 8 },
+    { day: 'FRIDAY', startTime: '09:00', endTime: '18:00', breakMinutes: 60, hours: 8 },
+  ];
+
+  const standardSchedule = await prisma.workingSchedule.upsert({
+    where: { name: '40 Hours / Week' },
+    update: {},
+    create: {
+      name: '40 Hours / Week',
+      calendarType: 'Standard',
+      company: 'My Company',
+      timezone: 'Company Timezone',
+      status: 'ACTIVE',
+      daysPerWeek: 5,
+      hoursPerWeek: 40,
+      days: { create: weekdayNineToSix },
+    },
+  });
+
+  await prisma.workingSchedule.upsert({
+    where: { name: 'Night Shift' },
+    update: {},
+    create: {
+      name: 'Night Shift',
+      calendarType: 'Shift',
+      company: 'My Company',
+      timezone: 'Company Timezone',
+      status: 'ACTIVE',
+      daysPerWeek: 5,
+      hoursPerWeek: 40,
+      days: {
+        create: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'].map((day) => ({
+          day,
+          startTime: '21:00',
+          endTime: '06:00',
+          breakMinutes: 60,
+          hours: 8,
+        })),
+      },
+    },
+  });
+
+  await prisma.workingSchedule.upsert({
+    where: { name: 'Retail Weekend' },
+    update: {},
+    create: {
+      name: 'Retail Weekend',
+      calendarType: 'Shift',
+      company: 'My Company',
+      timezone: 'Company Timezone',
+      status: 'ACTIVE',
+      daysPerWeek: 5,
+      hoursPerWeek: 40,
+      days: {
+        create: ['WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map((day) => ({
+          day,
+          startTime: '09:00',
+          endTime: '18:00',
+          breakMinutes: 60,
+          hours: 8,
+        })),
+      },
+    },
+  });
+
+  await prisma.workingSchedule.upsert({
+    where: { name: 'Flexible Hybrid' },
+    update: {},
+    create: {
+      name: 'Flexible Hybrid',
+      calendarType: 'Flexible',
+      company: 'My Company',
+      timezone: 'Company Timezone',
+      status: 'ACTIVE',
+      daysPerWeek: 5,
+      hoursPerWeek: 37.5,
+      days: {
+        create: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'].map((day) => ({
+          day,
+          startTime: '09:00',
+          endTime: '17:00',
+          breakMinutes: 30,
+          hours: 7.5,
+        })),
+      },
+    },
+  });
+
+  await prisma.workingSchedule.upsert({
+    where: { name: 'Part-time 20h' },
+    update: {},
+    create: {
+      name: 'Part-time 20h',
+      calendarType: 'Standard',
+      company: 'My Company',
+      timezone: 'Company Timezone',
+      status: 'INACTIVE',
+      daysPerWeek: 4,
+      hoursPerWeek: 20,
+      days: {
+        create: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY'].map((day) => ({
+          day,
+          startTime: '09:00',
+          endTime: '14:30',
+          breakMinutes: 30,
+          hours: 5,
+        })),
+      },
+    },
+  });
+
   // 3. Seed Time Off Types
   const annualLeaveType = await prisma.timeOffType.upsert({
     where: { code: 'AL' },
@@ -167,7 +283,7 @@ async function main() {
   // 4. Seed Employees
   const emp1 = await prisma.employee.upsert({
     where: { employeeCode: 'EMP001' },
-    update: {},
+    update: { scheduleId: standardSchedule.id },
     create: {
       userId: empUser1.id,
       employeeCode: 'EMP001',
@@ -178,6 +294,7 @@ async function main() {
       department: 'Engineering',
       jobPosition: 'Senior Software Engineer',
       workingSchedule: 'Standard 40h/week',
+      scheduleId: standardSchedule.id,
       status: 'ACTIVE',
       bankName: 'Chase Bank',
       bankAccountNo: '1234567890',
@@ -187,7 +304,7 @@ async function main() {
 
   const emp2 = await prisma.employee.upsert({
     where: { employeeCode: 'EMP002' },
-    update: {},
+    update: { scheduleId: standardSchedule.id },
     create: {
       userId: empUser2.id,
       employeeCode: 'EMP002',
@@ -198,6 +315,7 @@ async function main() {
       department: 'Product',
       jobPosition: 'Product Manager',
       workingSchedule: 'Standard 40h/week',
+      scheduleId: standardSchedule.id,
       status: 'ACTIVE',
       bankName: 'Silicon Valley Bank',
       bankAccountNo: '9876543210',
@@ -208,10 +326,29 @@ async function main() {
   // 5. Seed Contracts for Employees
   const currentYear = new Date().getFullYear();
 
+  // Employee 1 Prior (Expired) Contract — demonstrates contract history
+  await prisma.contract.upsert({
+    where: { id: 'contract-emp-001-prev' },
+    update: { workingScheduleId: standardSchedule.id },
+    create: {
+      id: 'contract-emp-001-prev',
+      employeeId: emp1.id,
+      contractName: 'Software Engineer — Initial Term',
+      startDate: new Date(`${currentYear - 1}-01-01T00:00:00.000Z`),
+      endDate: new Date(`${currentYear - 1}-12-31T00:00:00.000Z`),
+      wage: 5200,
+      department: 'Engineering',
+      jobPosition: 'Software Engineer',
+      salaryStructureId: regularSalaryStructure.id,
+      workingScheduleId: standardSchedule.id,
+      status: ContractStatus.CLOSED,
+    },
+  });
+
   // Employee 1 Active Contract
   await prisma.contract.upsert({
     where: { id: 'contract-emp-001' },
-    update: {},
+    update: { workingScheduleId: standardSchedule.id },
     create: {
       id: 'contract-emp-001',
       employeeId: emp1.id,
@@ -222,6 +359,7 @@ async function main() {
       department: 'Engineering',
       jobPosition: 'Senior Software Engineer',
       salaryStructureId: regularSalaryStructure.id,
+      workingScheduleId: standardSchedule.id,
       status: ContractStatus.ACTIVE,
     },
   });
@@ -229,7 +367,7 @@ async function main() {
   // Employee 2 Active Contract
   await prisma.contract.upsert({
     where: { id: 'contract-emp-002' },
-    update: {},
+    update: { workingScheduleId: standardSchedule.id },
     create: {
       id: 'contract-emp-002',
       employeeId: emp2.id,
@@ -240,6 +378,7 @@ async function main() {
       department: 'Product',
       jobPosition: 'Product Manager',
       salaryStructureId: regularSalaryStructure.id,
+      workingScheduleId: standardSchedule.id,
       status: ContractStatus.ACTIVE,
     },
   });

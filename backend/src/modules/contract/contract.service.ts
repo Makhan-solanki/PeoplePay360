@@ -36,10 +36,23 @@ export async function assertNoOverlappingActiveContract(
   }
 }
 
+export async function getAllContracts() {
+  return prisma.contract.findMany({
+    include: {
+      employee: {
+        select: { id: true, firstName: true, lastName: true, employeeCode: true, department: true },
+      },
+      salaryStructure: true,
+      workingSchedule: true,
+    },
+    orderBy: { startDate: 'desc' },
+  });
+}
+
 export async function getContractsByEmployee(employeeId: string) {
   return prisma.contract.findMany({
     where: { employeeId },
-    include: { salaryStructure: true },
+    include: { salaryStructure: true, workingSchedule: true },
     orderBy: { startDate: 'desc' },
   });
 }
@@ -52,6 +65,7 @@ export async function getContractById(id: string) {
       salaryStructure: {
         include: { rules: { orderBy: { sequence: 'asc' } } },
       },
+      workingSchedule: true,
     },
   });
 
@@ -81,7 +95,7 @@ export async function createContract(data: CreateContractInput) {
       endDate: end,
       status: (data.status as ContractStatus) || ContractStatus.ACTIVE,
     },
-    include: { salaryStructure: true },
+    include: { salaryStructure: true, workingSchedule: true },
   });
 }
 
@@ -112,6 +126,6 @@ export async function updateContract(id: string, data: UpdateContractInput) {
       endDate: end,
       status,
     },
-    include: { salaryStructure: true },
+    include: { salaryStructure: true, workingSchedule: true },
   });
 }

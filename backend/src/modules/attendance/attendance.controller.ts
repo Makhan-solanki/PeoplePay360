@@ -54,3 +54,27 @@ export async function getToday(req: Request, res: Response, next: NextFunction) 
     next(error);
   }
 }
+
+export async function getAttendance(req: Request, res: Response, next: NextFunction) {
+  try {
+    const attendance = await attendanceService.getAttendanceById(req.params.id);
+    res.status(200).json({
+      success: true,
+      data: attendance,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateAttendance(req: Request, res: Response, next: NextFunction) {
+  try {
+    const attendance = await attendanceService.updateAttendance(req.params.id, req.body);
+    res.status(200).json({
+      success: true,
+      data: attendance,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -16,6 +17,7 @@ import contractRoutes from './modules/contract/contract.routes';
 import attendanceRoutes from './modules/attendance/attendance.routes';
 import timeOffRoutes from './modules/timeoff/timeoff.routes';
 import payrollRoutes from './modules/payroll/payroll.routes';
+import workingScheduleRoutes from './modules/working-schedule/working-schedule.routes';
 
 const app = express();
 
@@ -52,6 +54,7 @@ app.use('/api/contracts', contractRoutes);
 app.use('/api/attendances', attendanceRoutes);
 app.use('/api/time-off', timeOffRoutes);
 app.use('/api/payroll', payrollRoutes);
+app.use('/api/working-schedules', workingScheduleRoutes);
 
 // ---- 404 Handler ----
 app.use((_req, res) => {

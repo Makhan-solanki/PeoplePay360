@@ -1,7 +1,13 @@
 import { PayrunStatus, PayslipStatus, ContractStatus } from '@prisma/client';
 import prisma from '../../lib/prisma';
-import { BadRequestError, NotFoundError } from '../../lib/errors';
-import { CreatePayrunInput } from './payroll.schema';
+import { BadRequestError, NotFoundError, ConflictError } from '../../lib/errors';
+import {
+  CreatePayrunInput,
+  SalaryStructureInput,
+  UpdateSalaryStructureInput,
+  SalaryRuleInput,
+  UpdateSalaryRuleInput,
+} from './payroll.schema';
 
 export interface ComputedLineItem {
   ruleCode: string;
@@ -125,6 +131,97 @@ export async function getSalaryStructures() {
     include: {
       rules: { orderBy: { sequence: 'asc' } },
     },
+  });
+}
+
+export async function createSalaryStructure(data: SalaryStructureInput) {
+  const existing = await prisma.salaryStructure.findFirst({
+    where: { OR: [{ name: data.name }, { code: data.code }] },
+  });
+  if (existing) {
+    throw new ConflictError(`A salary structure with this name or code already exists`);
+  }
+
+  return prisma.salaryStructure.create({
+    data: {
+      name: data.name,
+      code: data.code,
+      description: data.description ?? null,
+    },
+    include: { rules: { orderBy: { sequence: 'asc' } } },
+  });
+}
+
+export async function updateSalaryStructure(id: string, data: UpdateSalaryStructureInput) {
+  const existing = await prisma.salaryStructure.findUnique({ where: { id } });
+  if (!existing) {
+    throw new NotFoundError(`Salary structure '${id}' not found`);
+  }
+
+  if (data.name || data.code) {
+    const clash = await prisma.salaryStructure.findFirst({
+      where: {
+        id: { not: id },
+        OR: [...(data.name ? [{ name: data.name }] : []), ...(data.code ? [{ code: data.code }] : [])],
+      },
+    });
+    if (clash) {
+      throw new ConflictError('A salary structure with this name or code already exists');
+    }
+  }
+
+  return prisma.salaryStructure.update({
+    where: { id },
+    data,
+    include: { rules: { orderBy: { sequence: 'asc' } } },
+  });
+}
+
+export async function createSalaryRule(structureId: string, data: SalaryRuleInput) {
+  const structure = await prisma.salaryStructure.findUnique({ where: { id: structureId } });
+  if (!structure) {
+    throw new NotFoundError(`Salary structure '${structureId}' not found`);
+  }
+
+  const existingCode = await prisma.salaryRule.findFirst({
+    where: { salaryStructureId: structureId, code: data.code },
+  });
+  if (existingCode) {
+    throw new ConflictError(`Rule code '${data.code}' already exists in this structure`);
+  }
+
+  return prisma.salaryRule.create({
+    data: {
+      salaryStructureId: structureId,
+      name: data.name,
+      code: data.code,
+      category: data.category,
+      sequence: data.sequence,
+      percentage: data.percentage ?? null,
+      fixedAmount: data.fixedAmount ?? null,
+      conditionRule: data.conditionRule ?? null,
+    },
+  });
+}
+
+export async function updateSalaryRule(id: string, data: UpdateSalaryRuleInput) {
+  const existing = await prisma.salaryRule.findUnique({ where: { id } });
+  if (!existing) {
+    throw new NotFoundError(`Salary rule '${id}' not found`);
+  }
+
+  if (data.code) {
+    const clash = await prisma.salaryRule.findFirst({
+      where: { salaryStructureId: existing.salaryStructureId, code: data.code, id: { not: id } },
+    });
+    if (clash) {
+      throw new ConflictError(`Rule code '${data.code}' already exists in this structure`);
+    }
+  }
+
+  return prisma.salaryRule.update({
+    where: { id },
+    data,
   });
 }
 
@@ -351,6 +448,106 @@ export async function markPayrunPaid(payrunId: string) {
       },
     });
   });
+}
+
+/**
+ * Recompute a single payslip in place (e.g. after a contract or rule change),
+ * then refresh the parent payrun's aggregate totals to stay consistent.
+ */
+export async function computeSinglePayslip(payslipId: string) {
+  const payslip = await prisma.payslip.findUnique({
+    where: { id: payslipId },
+    include: {
+      employee: true,
+      payrun: { include: { salaryStructure: { include: { rules: { orderBy: { sequence: 'asc' } } } } } },
+    },
+  });
+
+  if (!payslip) {
+    throw new NotFoundError(`Payslip '${payslipId}' not found`);
+  }
+
+  if (payslip.payrun.status === PayrunStatus.PAID) {
+    throw new BadRequestError('Cannot recompute a payslip on an already PAID payrun');
+  }
+
+  const applicableContract = await prisma.contract.findFirst({
+    where: {
+      employeeId: payslip.employeeId,
+      status: ContractStatus.ACTIVE,
+      startDate: { lte: payslip.payrun.periodEndDate },
+      OR: [{ endDate: null }, { endDate: { gte: payslip.payrun.periodStartDate } }],
+    },
+  });
+
+  if (!applicableContract) {
+    throw new BadRequestError('Employee no longer has an active contract covering this payrun period');
+  }
+
+  const computation = computeSalaryBreakdown(applicableContract.wage, payslip.payrun.salaryStructure.rules, {
+    bankAccountNo: payslip.employee.bankAccountNo,
+    bankName: payslip.employee.bankName,
+  });
+
+  const updated = await prisma.payslip.update({
+    where: { id: payslipId },
+    data: {
+      contractId: applicableContract.id,
+      basicWage: computation.basicWage,
+      grossPay: computation.grossPay,
+      deductions: computation.deductions,
+      netPay: computation.netPay,
+      lineItems: computation.lineItems as any,
+      warnings: computation.warnings as any,
+      status: PayslipStatus.COMPUTED,
+    },
+  });
+
+  const allPayslips = await prisma.payslip.findMany({ where: { payrunId: payslip.payrunId } });
+  await prisma.payrun.update({
+    where: { id: payslip.payrunId },
+    data: {
+      totalGross: allPayslips.reduce((sum, s) => sum + s.grossPay, 0),
+      totalDeductions: allPayslips.reduce((sum, s) => sum + s.deductions, 0),
+      totalNet: allPayslips.reduce((sum, s) => sum + s.netPay, 0),
+      status: payslip.payrun.status === PayrunStatus.DRAFT ? PayrunStatus.COMPUTED : payslip.payrun.status,
+    },
+  });
+
+  return getPayslipById(payslipId);
+}
+
+/**
+ * Mark a single payslip as PAID, independent of sibling payslips in the same payrun.
+ * Requires the parent payrun to have already been validated.
+ */
+export async function markSinglePayslipPaid(payslipId: string) {
+  const payslip = await prisma.payslip.findUnique({
+    where: { id: payslipId },
+    include: { payrun: true },
+  });
+
+  if (!payslip) {
+    throw new NotFoundError(`Payslip '${payslipId}' not found`);
+  }
+
+  if (payslip.payrun.status !== PayrunStatus.VALIDATED && payslip.payrun.status !== PayrunStatus.PAID) {
+    throw new BadRequestError('Payrun must be VALIDATED before individual payslips can be marked as PAID');
+  }
+
+  await prisma.payslip.update({
+    where: { id: payslipId },
+    data: { status: PayslipStatus.PAID },
+  });
+
+  // If every payslip in the payrun is now paid, the payrun itself graduates to PAID too.
+  const siblings = await prisma.payslip.findMany({ where: { payrunId: payslip.payrunId } });
+  const allPaid = siblings.every((s) => s.status === PayslipStatus.PAID);
+  if (allPaid && payslip.payrun.status !== PayrunStatus.PAID) {
+    await prisma.payrun.update({ where: { id: payslip.payrunId }, data: { status: PayrunStatus.PAID } });
+  }
+
+  return getPayslipById(payslipId);
 }
 
 export async function getPayslipById(id: string) {

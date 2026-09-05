@@ -3,12 +3,10 @@ import * as contractService from './contract.service';
 
 export async function listContracts(req: Request, res: Response, next: NextFunction) {
   try {
-    const { employeeId } = req.query as { employeeId: string };
-    if (!employeeId) {
-      res.status(400).json({ success: false, error: 'employeeId query parameter is required' });
-      return;
-    }
-    const contracts = await contractService.getContractsByEmployee(employeeId);
+    const { employeeId } = req.query as { employeeId?: string };
+    const contracts = employeeId
+      ? await contractService.getContractsByEmployee(employeeId)
+      : await contractService.getAllContracts();
     res.status(200).json({
       success: true,
       data: contracts,

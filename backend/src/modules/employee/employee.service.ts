@@ -33,6 +33,7 @@ export async function getAllEmployees(filters?: {
       manager: {
         select: { id: true, firstName: true, lastName: true, employeeCode: true },
       },
+      schedule: true,
       contracts: {
         where: { status: 'ACTIVE' },
         include: { salaryStructure: true },
@@ -57,8 +58,9 @@ export async function getEmployeeById(id: string) {
       subordinates: {
         select: { id: true, firstName: true, lastName: true, employeeCode: true, jobPosition: true },
       },
+      schedule: true,
       contracts: {
-        include: { salaryStructure: true },
+        include: { salaryStructure: true, workingSchedule: true },
         orderBy: { startDate: 'desc' },
       },
       timeOffBalances: {

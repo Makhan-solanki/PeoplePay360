@@ -40,7 +40,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-[440px] mx-auto bg-[#14171F] border border-slate-800 rounded-3xl p-8 shadow-2xl text-slate-100 selection:bg-blue-500/20">
+    <div className="w-full max-w-[440px] mx-auto bg-[#14171F] border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl text-slate-100 selection:bg-blue-500/20">
       {/* Header matching Mockup 2 */}
       <div className="mb-6">
         <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">

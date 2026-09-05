@@ -1,11 +1,82 @@
 import { TimeOffStatus } from '@prisma/client';
 import prisma from '../../lib/prisma';
-import { BadRequestError, NotFoundError } from '../../lib/errors';
-import { CreateTimeOffRequestInput, RejectTimeOffRequestInput } from './timeoff.schema';
+import { BadRequestError, ConflictError, NotFoundError } from '../../lib/errors';
+import {
+  CreateTimeOffRequestInput,
+  RejectTimeOffRequestInput,
+  CreateTimeOffTypeInput,
+  UpdateTimeOffTypeInput,
+  CreateAllocationInput,
+} from './timeoff.schema';
 
 export async function getTimeOffTypes() {
   return prisma.timeOffType.findMany({
     orderBy: { name: 'asc' },
+  });
+}
+
+export async function createTimeOffType(data: CreateTimeOffTypeInput) {
+  const existing = await prisma.timeOffType.findFirst({
+    where: { OR: [{ name: data.name }, { code: data.code }] },
+  });
+  if (existing) {
+    throw new ConflictError('A time off type with this name or code already exists');
+  }
+
+  return prisma.timeOffType.create({ data });
+}
+
+export async function updateTimeOffType(id: string, data: UpdateTimeOffTypeInput) {
+  const existing = await prisma.timeOffType.findUnique({ where: { id } });
+  if (!existing) {
+    throw new NotFoundError(`Time off type '${id}' not found`);
+  }
+
+  if (data.name || data.code) {
+    const clash = await prisma.timeOffType.findFirst({
+      where: {
+        id: { not: id },
+        OR: [...(data.name ? [{ name: data.name }] : []), ...(data.code ? [{ code: data.code }] : [])],
+      },
+    });
+    if (clash) {
+      throw new ConflictError('A time off type with this name or code already exists');
+    }
+  }
+
+  return prisma.timeOffType.update({ where: { id }, data });
+}
+
+/**
+ * Manually create or top up an employee's leave balance for a given year.
+ * If an allocation already exists for that employee/type/year, its allocatedDays
+ * is replaced (not summed) — this is a correction tool, not an accrual ledger.
+ */
+export async function createAllocation(data: CreateAllocationInput) {
+  const [employee, type] = await Promise.all([
+    prisma.employee.findUnique({ where: { id: data.employeeId } }),
+    prisma.timeOffType.findUnique({ where: { id: data.timeOffTypeId } }),
+  ]);
+  if (!employee) throw new NotFoundError(`Employee '${data.employeeId}' not found`);
+  if (!type) throw new NotFoundError(`Time off type '${data.timeOffTypeId}' not found`);
+
+  return prisma.timeOffAllocation.upsert({
+    where: {
+      employeeId_timeOffTypeId_year: {
+        employeeId: data.employeeId,
+        timeOffTypeId: data.timeOffTypeId,
+        year: data.year,
+      },
+    },
+    update: { allocatedDays: data.allocatedDays },
+    create: {
+      employeeId: data.employeeId,
+      timeOffTypeId: data.timeOffTypeId,
+      year: data.year,
+      allocatedDays: data.allocatedDays,
+      usedDays: 0,
+    },
+    include: { timeOffType: true },
   });
 }
 
@@ -47,6 +118,7 @@ export async function getTimeOffRequests(filters?: {
         },
       },
       timeOffType: true,
+      decidedBy: { select: { id: true, email: true, employee: { select: { firstName: true, lastName: true } } } },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -105,7 +177,7 @@ export async function submitTimeOffRequest(data: CreateTimeOffRequestInput) {
  * Approve a Time Off request.
  * Atomically locks and decrements the allocation balance.
  */
-export async function approveTimeOffRequest(requestId: string) {
+export async function approveTimeOffRequest(requestId: string, decidedById: string) {
   return prisma.$transaction(async (tx) => {
     const request = await tx.timeOffRequest.findUnique({
       where: { id: requestId },
@@ -155,16 +227,19 @@ export async function approveTimeOffRequest(requestId: string) {
       where: { id: requestId },
       data: {
         status: TimeOffStatus.APPROVED,
+        decidedById,
+        decidedAt: new Date(),
       },
       include: {
         timeOffType: true,
         employee: true,
+        decidedBy: { select: { id: true, email: true, employee: { select: { firstName: true, lastName: true } } } },
       },
     });
   });
 }
 
-export async function rejectTimeOffRequest(requestId: string, input?: RejectTimeOffRequestInput) {
+export async function rejectTimeOffRequest(requestId: string, decidedById: string, input?: RejectTimeOffRequestInput) {
   const request = await prisma.timeOffRequest.findUnique({ where: { id: requestId } });
   if (!request) {
     throw new NotFoundError(`Time off request '${requestId}' not found`);
@@ -179,10 +254,13 @@ export async function rejectTimeOffRequest(requestId: string, input?: RejectTime
     data: {
       status: TimeOffStatus.REJECTED,
       rejectionNote: input?.rejectionNote ?? null,
+      decidedById,
+      decidedAt: new Date(),
     },
     include: {
       timeOffType: true,
       employee: true,
+      decidedBy: { select: { id: true, email: true, employee: { select: { firstName: true, lastName: true } } } },
     },
   });
 }

@@ -47,15 +47,21 @@ enum PayslipStatus {
   PAID
 }
 
+enum WorkingScheduleStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  password     String
-  role         Role      @default(EMPLOYEE)
-  refreshToken String?
-  employee     Employee?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                     String           @id @default(cuid())
+  email                  String           @unique
+  password               String
+  role                   Role             @default(EMPLOYEE)
+  refreshToken           String?
+  employee               Employee?
+  decidedTimeOffRequests TimeOffRequest[] @relation("TimeOffDecidedBy")
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 
   @@map("users")
 }
@@ -75,6 +81,8 @@ model Employee {
   manager         Employee?            @relation("ManagerSubordinates", fields: [managerId], references: [id], onDelete: SetNull)
   subordinates    Employee[]           @relation("ManagerSubordinates")
   workingSchedule String               @default("Standard 40h/week")
+  scheduleId      String?
+  schedule        WorkingSchedule?     @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
   status          String               @default("ACTIVE") // ACTIVE, INACTIVE, ON_LEAVE
   bankName        String?
   bankAccountNo   String?
@@ -102,12 +110,47 @@ model Contract {
   jobPosition       String
   salaryStructureId String
   salaryStructure   SalaryStructure @relation(fields: [salaryStructureId], references: [id])
+  workingScheduleId String?
+  workingSchedule   WorkingSchedule? @relation(fields: [workingScheduleId], references: [id], onDelete: SetNull)
   status            ContractStatus  @default(ACTIVE)
   payslips          Payslip[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   @@map("contracts")
+}
+
+model WorkingSchedule {
+  id           String                @id @default(cuid())
+  name         String                @unique // e.g., "40 Hours / Week"
+  calendarType String                @default("Standard") // Standard, Shift, Flexible
+  company      String                @default("My Company")
+  timezone     String                @default("Company Timezone")
+  daysPerWeek  Int                   @default(0)
+  hoursPerWeek Float                 @default(0)
+  status       WorkingScheduleStatus @default(ACTIVE)
+  days         WorkingScheduleDay[]
+  employees    Employee[]
+  contracts    Contract[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@map("working_schedules")
+}
+
+model WorkingScheduleDay {
+  id                String          @id @default(cuid())
+  workingScheduleId String
+  workingSchedule   WorkingSchedule @relation(fields: [workingScheduleId], references: [id], onDelete: Cascade)
+  day               String          // MONDAY, TUESDAY, ... SUNDAY
+  startTime         String          // "09:00"
+  endTime           String          // "18:00"
+  breakMinutes      Int             @default(0)
+  hours             Float           // derived: (endTime - startTime) - break
+  createdAt         DateTime        @default(now())
+
+  @@unique([workingScheduleId, day])
+  @@map("working_schedule_days")
 }
 
 model Attendance {
@@ -168,6 +211,9 @@ model TimeOffRequest {
   status        TimeOffStatus @default(PENDING)
   reason        String?
   rejectionNote String?
+  decidedById   String?
+  decidedBy     User?         @relation("TimeOffDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt     DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

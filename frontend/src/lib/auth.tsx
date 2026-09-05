@@ -8,6 +8,14 @@ interface User {
   email: string;
   role: string;
   createdAt?: string;
+  employee?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    employeeCode: string;
+    department: string;
+    jobPosition: string;
+  } | null;
 }
 
 interface AuthContextType {
