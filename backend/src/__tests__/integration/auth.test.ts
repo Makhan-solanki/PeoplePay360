@@ -37,7 +37,7 @@ describe('Auth Endpoints — Full Flow', () => {
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
       expect(res.body.data.user.email).toBe(testEmail);
-      expect(res.body.data.user.role).toBe('USER');
+      expect(res.body.data.user.role).toBe('EMPLOYEE');
       expect(res.body.data.accessToken).toBeDefined();
       // Should not return password
       expect(res.body.data.user.password).toBeUndefined();
@@ -124,7 +124,7 @@ describe('Auth Endpoints — Full Flow', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.email).toBe(testEmail);
-      expect(res.body.data.role).toBe('USER');
+      expect(res.body.data.role).toBe('EMPLOYEE');
     });
 
     it('should reject request without token', async () => {

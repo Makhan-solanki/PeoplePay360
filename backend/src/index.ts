@@ -66,9 +66,12 @@ app.use((_req, res) => {
 app.use(errorHandler);
 
 // ---- Server Startup ----
-const server = app.listen(env.PORT, () => {
-  logger.info(`🚀 Server running on port ${env.PORT} [${env.NODE_ENV}]`);
-});
+let server: any;
+if (env.NODE_ENV !== 'test') {
+  server = app.listen(env.PORT, () => {
+    logger.info(`🚀 Server running on port ${env.PORT} [${env.NODE_ENV}]`);
+  });
+}
 
 // ---- Graceful Shutdown ----
 const gracefulShutdown = async (signal: string) => {
