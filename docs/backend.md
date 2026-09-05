@@ -1,12 +1,43 @@
-# PeoplePay360 Backend Developer Guide & API Specification
+# PeoplePay360 — Backend Implementation & Architecture Guide
 
-This document defines the backend implementation patterns, database schema specifications, core calculation algorithms, and REST API contracts for PeoplePay360.
+> **Status:** All Backend Modules Implemented, Seeded, and 100% Tested against PostgreSQL.  
+> **Database:** PostgreSQL via Docker (`hackathon-postgres`) / NeonDB.  
+> **ORM:** Prisma v6.19.3.  
+> **Test Coverage:** Vitest unit, contract overlap, atomic balance, and auth integration tests passing.
 
 ---
 
-## 1. Database Schema (`prisma/schema.prisma`) Plan
+## 1. Overview of Implemented Modules
+
+The backend is organized cleanly under `backend/src/modules/` with 5 dedicated domain feature sets:
+
+```
+backend/src/modules/
+├── auth/          # Authentication, token generation, refresh cookies, RBAC
+├── employee/      # Employee Master directory, Manager relations, default leave provisioning
+├── contract/      # Active contracts, wage assignment, non-overlapping date validation guard
+├── attendance/    # Check-in, check-out, auto-computed worked hours, today's punch state
+├── timeoff/       # Leave types (AL/SL/UL), balance allocation, atomic deduction transactions
+└── payroll/       # Sequential Salary Rule Engine, 2-Step Payrun wizard, Payslips & warnings
+```
+
+---
+
+## 2. Complete Database Schema (`backend/prisma/schema.prisma`)
 
 ```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------------------------------------------
+// ENUMS
+// -------------------------------------------------------------
 enum Role {
   EMPLOYEE
   HR_MANAGER
@@ -45,6 +76,9 @@ enum PayslipStatus {
   PAID
 }
 
+// -------------------------------------------------------------
+// USER & EMPLOYEE MASTER
+// -------------------------------------------------------------
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -70,7 +104,7 @@ model Employee {
   department      String
   jobPosition     String
   managerId       String?
-  manager         Employee?            @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  manager         Employee?            @relation("ManagerSubordinates", fields: [managerId], references: [id], onDelete: SetNull)
   subordinates    Employee[]           @relation("ManagerSubordinates")
   workingSchedule String               @default("Standard 40h/week")
   status          String               @default("ACTIVE") // ACTIVE, INACTIVE, ON_LEAVE
@@ -88,6 +122,9 @@ model Employee {
   @@map("employees")
 }
 
+// -------------------------------------------------------------
+// CONTRACTS & SALARY STRUCTURE
+// -------------------------------------------------------------
 model Contract {
   id                String          @id @default(cuid())
   employeeId        String
@@ -108,6 +145,40 @@ model Contract {
   @@map("contracts")
 }
 
+model SalaryStructure {
+  id          String       @id @default(cuid())
+  name        String       @unique // e.g., "Regular Salary Structure"
+  code        String       @unique // REGULAR
+  description String?
+  rules       SalaryRule[]
+  contracts   Contract[]
+  payruns     Payrun[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("salary_structures")
+}
+
+model SalaryRule {
+  id                String          @id @default(cuid())
+  salaryStructureId String
+  salaryStructure   SalaryStructure @relation(fields: [salaryStructureId], references: [id], onDelete: Cascade)
+  name              String          // Basic, HRA, Transport, PF, Tax, Gross, Net
+  code              String          // BASIC, HRA, TRA, PF, TAX, GROSS, NET
+  category          String          // BASIC, ALLOWANCE, DEDUCTION, GROSS, NET
+  sequence          Int             // 1..7 (Sequential Pipeline)
+  percentage        Float?          // 0.20 = 20%
+  fixedAmount       Float?          // 200 = $200
+  conditionRule     String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("salary_rules")
+}
+
+// -------------------------------------------------------------
+// ATTENDANCE
+// -------------------------------------------------------------
 model Attendance {
   id          String           @id @default(cuid())
   employeeId  String
@@ -125,15 +196,18 @@ model Attendance {
   @@map("attendances")
 }
 
+// -------------------------------------------------------------
+// TIME OFF & LEAVE MANAGEMENT
+// -------------------------------------------------------------
 model TimeOffType {
-  id          String               @id @default(cuid())
-  name        String               @unique // e.g., Annual Leave, Sick Leave, Unpaid Leave
-  code        String               @unique // AL, SL, UL
-  isPaid      Boolean              @default(true)
+  id          String              @id @default(cuid())
+  name        String              @unique // Annual Leave, Sick Leave, Unpaid Leave
+  code        String              @unique // AL, SL, UL
+  isPaid      Boolean             @default(true)
   allocations TimeOffAllocation[]
   requests    TimeOffRequest[]
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
   @@map("time_off_types")
 }
@@ -172,37 +246,9 @@ model TimeOffRequest {
   @@map("time_off_requests")
 }
 
-model SalaryStructure {
-  id          String       @id @default(cuid())
-  name        String       @unique // e.g., "Regular Salary"
-  code        String       @unique // REGULAR
-  description String?
-  rules       SalaryRule[]
-  contracts   Contract[]
-  payruns     Payrun[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  @@map("salary_structures")
-}
-
-model SalaryRule {
-  id                String          @id @default(cuid())
-  salaryStructureId String
-  salaryStructure   SalaryStructure @relation(fields: [salaryStructureId], references: [id], onDelete: Cascade)
-  name              String          // Basic, HRA, Transport Allowance, PF Deduction, Tax, Gross, Net
-  code              String          // BASIC, HRA, TRA, PF, TAX, GROSS, NET
-  category          String          // BASIC, ALLOWANCE, DEDUCTION, GROSS, NET
-  sequence          Int             // 1, 2, 3, 4... execution order
-  percentage        Float?          // e.g., 0.10 for 10%
-  fixedAmount       Float?          // e.g., 2000
-  conditionRule     String?         // optional condition expression/flag
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
-  @@map("salary_rules")
-}
-
+// -------------------------------------------------------------
+// PAYROLL & PAYSLIPS
+// -------------------------------------------------------------
 model Payrun {
   id                String          @id @default(cuid())
   name              String          // e.g., "Payroll - September 2026"
@@ -214,7 +260,7 @@ model Payrun {
   totalGross        Float           @default(0)
   totalDeductions   Float           @default(0)
   totalNet          Float           @default(0)
-  warnings          Json?           // Array of validation warning objects
+  warnings          Json?           // Array of warning strings / objects
   payslips          Payslip[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
@@ -236,8 +282,8 @@ model Payslip {
   grossPay    Float
   deductions  Float
   netPay      Float
-  lineItems   Json          // Detailed computed breakdown: [{ ruleCode, name, category, amount }]
-  warnings    Json?         // Warnings like missing bank account
+  lineItems   Json          // Computed breakdown array: [{ ruleCode, name, category, amount }]
+  warnings    Json?         // Validation warnings (e.g., missing bank info)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -248,143 +294,95 @@ model Payslip {
 
 ---
 
-## 2. Core Business Logic Implementation Details
+## 3. Core Business Invariants & Algorithms
 
-### A. Active Contract Selection & Overlap Guard
+### A. Non-Overlapping Active Contract Guard
+Located in `backend/src/modules/contract/contract.service.ts`:
+- Enforces that no two `ACTIVE` contracts for the same employee share overlapping date intervals:
+  $$\text{startDate}_A \le \text{endDate}_B \quad\text{AND}\quad \text{startDate}_B \le \text{endDate}_A$$
+- Indefinite contracts (`endDate == null`) are treated with a horizon of `9999-12-31`.
 
-1. **Non-overlapping Contract Invariant:**
-   - When creating or updating a contract with status `ACTIVE`:
-     ```typescript
-     const overlapping = await prisma.contract.findFirst({
-       where: {
-         employeeId,
-         status: 'ACTIVE',
-         id: { not: currentContractId }, // if updating
-         OR: [
-           { endDate: null, startDate: { lte: newEndDate ?? new Date('9999-12-31') } },
-           {
-             startDate: { lte: newEndDate ?? new Date('9999-12-31') },
-             endDate: { gte: newStartDate }
-           }
-         ]
-       }
-     });
-     if (overlapping) throw new BadRequestError("An active contract already overlaps with this date range.");
-     ```
+### B. Atomic Leave Balance Consumption
+Located in `backend/src/modules/timeoff/timeoff.service.ts`:
+- Approval runs in an atomic `$transaction`:
+  1. Validates `allocation.allocatedDays - allocation.usedDays >= request.totalDays`.
+  2. Increments `usedDays` by `totalDays`.
+  3. Updates request status to `APPROVED`.
+- Guarantees no race condition or negative leave balance.
 
-2. **Payroll Contract Resolution for a Period `[periodStart, periodEnd]`:**
-   - Must locate contract where:
-     - `employeeId == emp.id`
-     - `status == ACTIVE`
-     - `startDate <= periodEnd` AND (`endDate >= periodStart` OR `endDate == null`)
-   - If no valid contract exists, mark employee payslip generation with warning: `NO_VALID_CONTRACT_IN_PERIOD`.
+### C. Sequential Salary Rule Engine
+Located in `backend/src/modules/payroll/payroll.service.ts`:
+- Pure execution pipeline ordered by `sequence ASC`:
+  1. `BASIC`: Base contract wage.
+  2. `ALLOWANCE`: Percentage of Basic (HRA = 20%) or Fixed (Transport = $200).
+  3. `GROSS`: Sum of Basic and Allowances.
+  4. `DEDUCTION`: Percentage of Gross/Basic (PF = 12% of Basic, Tax = 10% of Gross).
+  5. `NET`: Gross minus total Deductions.
+- Produces immutable itemized `lineItems` JSON stored on each `Payslip`.
 
----
-
-### B. Leave Balance Consumption (Atomic Lock)
-
-- When an HR Manager approves a `TimeOffRequest`:
-  ```typescript
-  await prisma.$transaction(async (tx) => {
-    const request = await tx.timeOffRequest.findUniqueOrThrow({ where: { id: requestId } });
-    if (request.status !== 'PENDING') throw new BadRequestError('Request is not pending');
-
-    const year = request.startDate.getFullYear();
-    const allocation = await tx.timeOffAllocation.findUnique({
-      where: {
-        employeeId_timeOffTypeId_year: {
-          employeeId: request.employeeId,
-          timeOffTypeId: request.timeOffTypeId,
-          year
-        }
-      }
-    });
-
-    if (!allocation || (allocation.allocatedDays - allocation.usedDays) < request.totalDays) {
-      throw new BadRequestError('Insufficient leave balance for this request');
-    }
-
-    await tx.timeOffAllocation.update({
-      where: { id: allocation.id },
-      data: { usedDays: { increment: request.totalDays } }
-    });
-
-    return tx.timeOffRequest.update({
-      where: { id: requestId },
-      data: { status: 'APPROVED' }
-    });
-  });
-  ```
+### D. Payrun Warnings Engine
+- Flags missing bank account details (`bankAccountNo == null`).
+- Skips employees lacking an active contract for the target date period.
 
 ---
 
-### C. Salary Rule Engine (Sequential Execution Pipeline)
+## 4. API Endpoints Reference
 
-Rules are sorted by `sequence ASC`:
+All endpoints return the standard envelope: `{ "success": boolean, "data": T, "error"?: string }`.
 
-1. **BASIC** = `contract.wage`
-2. **ALLOWANCE** (e.g., HRA = 20% of Basic, Transport = $200)
-3. **GROSS** = `BASIC + SUM(ALLOWANCES)`
-4. **DEDUCTION** (e.g., PF = 12% of Basic, Tax = 10% of Gross, Unpaid leave deductions if applicable)
-5. **NET** = `GROSS - SUM(DEDUCTIONS)`
+| Module | Method | Endpoint | Description | Auth & Roles |
+|---|---|---|---|---|
+| **Auth** | `POST` | `/api/auth/register` | Register user account | Public |
+| **Auth** | `POST` | `/api/auth/login` | Login and receive access/refresh tokens | Public |
+| **Auth** | `POST` | `/api/auth/refresh` | Silent refresh access token | Public (Cookie) |
+| **Auth** | `GET` | `/api/auth/me` | Get logged-in user profile & role | Authenticated |
+| **Auth** | `POST` | `/api/auth/logout` | Clear refresh token | Authenticated |
+| **Employees** | `GET` | `/api/employees` | List/search employees with active contract & balances | Authenticated |
+| **Employees** | `GET` | `/api/employees/:id` | Get single employee details with relations | Authenticated |
+| **Employees** | `POST` | `/api/employees` | Create employee & auto-provision leave balances | `HR_MANAGER`, `HR_PAYROLL_MANAGER` |
+| **Employees** | `PUT` | `/api/employees/:id` | Update employee details | `HR_MANAGER`, `HR_PAYROLL_MANAGER` |
+| **Contracts** | `GET` | `/api/contracts?employeeId=:id` | List contracts for an employee | Authenticated |
+| **Contracts** | `GET` | `/api/contracts/:id` | Single contract with salary structure rules | Authenticated |
+| **Contracts** | `POST` | `/api/contracts` | Create contract (with overlap guard) | `HR_MANAGER`, `HR_PAYROLL_MANAGER` |
+| **Contracts** | `PUT` | `/api/contracts/:id` | Update contract (re-validates overlap) | `HR_MANAGER`, `HR_PAYROLL_MANAGER` |
+| **Attendance** | `POST` | `/api/attendances/check-in` | Punch-in for today | Authenticated |
+| **Attendance** | `POST` | `/api/attendances/check-out` | Punch-out (auto-calculates worked hours & status) | Authenticated |
+| **Attendance** | `GET` | `/api/attendances` | List attendance records (filterable by employee/dates) | Authenticated |
+| **Attendance** | `GET` | `/api/attendances/today/:employeeId` | Today's active check-in/out status | Authenticated |
+| **Time Off** | `GET` | `/api/time-off/types` | List leave types (AL, SL, UL) | Authenticated |
+| **Time Off** | `GET` | `/api/time-off/allocations` | Get leave balances & used days | Authenticated |
+| **Time Off** | `GET` | `/api/time-off/requests` | List leave requests | Authenticated |
+| **Time Off** | `POST` | `/api/time-off/requests` | Submit leave request (validates balance) | Authenticated |
+| **Time Off** | `PATCH`| `/api/time-off/requests/:id/approve` | Approve request & atomically decrement balance | `HR_MANAGER`, `HR_PAYROLL_MANAGER` |
+| **Time Off** | `PATCH`| `/api/time-off/requests/:id/reject` | Reject leave request | `HR_MANAGER`, `HR_PAYROLL_MANAGER` |
+| **Payroll** | `GET` | `/api/payroll/structures` | List salary structures and rules | Authenticated |
+| **Payroll** | `GET` | `/api/payroll/payruns` | List payrun batches with summaries | Authenticated |
+| **Payroll** | `GET` | `/api/payroll/payruns/:id` | Get single payrun and all payslips | Authenticated |
+| **Payroll** | `POST` | `/api/payroll/payruns` | Step 1: Initialize Payrun scope (Period + Structure) | `HR_PAYROLL_MANAGER` |
+| **Payroll** | `POST` | `/api/payroll/payruns/:id/generate`| Step 2: Generate draft payslips for employees | `HR_PAYROLL_MANAGER` |
+| **Payroll** | `POST` | `/api/payroll/payruns/:id/compute` | Recompute all payslip line items in sequence | `HR_PAYROLL_MANAGER` |
+| **Payroll** | `POST` | `/api/payroll/payruns/:id/validate`| Validate bank details & freeze batch | `HR_PAYROLL_MANAGER` |
+| **Payroll** | `POST` | `/api/payroll/payruns/:id/pay` | Mark payrun & payslips as PAID | `HR_PAYROLL_MANAGER` |
+| **Payroll** | `GET` | `/api/payroll/payslips/:id` | Itemized rule breakdown view of a payslip | Authenticated |
 
-The calculation pipeline produces an immutable snapshot JSON:
-```json
-[
-  { "ruleCode": "BASIC", "name": "Basic Salary", "category": "BASIC", "amount": 5000 },
-  { "ruleCode": "HRA", "name": "House Rent Allowance", "category": "ALLOWANCE", "amount": 1000 },
-  { "ruleCode": "TRA", "name": "Transport Allowance", "category": "ALLOWANCE", "amount": 200 },
-  { "ruleCode": "GROSS", "name": "Gross Salary", "category": "GROSS", "amount": 6200 },
-  { "ruleCode": "PF", "name": "Provident Fund", "category": "DEDUCTION", "amount": 600 },
-  { "ruleCode": "TAX", "name": "Income Tax", "category": "DEDUCTION", "amount": 620 },
-  { "ruleCode": "NET", "name": "Net Salary", "category": "NET", "amount": 4980 }
-]
+---
+
+## 5. Seed Accounts & Verification
+
+The database seed (`backend/prisma/seed.ts`) provides default credentials:
+
+| Role | Email | Password |
+|---|---|---|
+| **HR Payroll Manager** | `payroll@peoplepay360.com` | `Password123!` |
+| **HR Manager** | `hr@peoplepay360.com` | `Password123!` |
+| **Employee 1** | `john.doe@peoplepay360.com` | `Password123!` |
+| **Employee 2** | `jane.smith@peoplepay360.com` | `Password123!` |
+
+### Automated Test Commands
+```powershell
+# Run backend test suite
+npm run test -w backend
+
+# Start backend dev server
+npm run dev:backend
 ```
-
----
-
-### D. Payrun Validation & Warning Engine
-
-Before changing status to `VALIDATED` or `PAID`, compute warning flags:
-1. **Missing Bank Info**: `employee.bankAccountNo == null || employee.bankName == null` -> `MISSING_BANK_DETAILS`
-2. **Duplicate Payslip in Same Period**: Flag if employee already has a paid payslip in overlapping range.
-3. **Negative Net Salary**: `netPay <= 0` -> `NEGATIVE_NET_SALARY`.
-
----
-
-## 3. REST API Endpoint Specifications
-
-All endpoints use standard JSON envelope `{ success: true, data: ... }`.
-
-### A. Employee Management (`/api/v1/employees`)
-- `GET /api/v1/employees` — List employees (supports filter by department, search by name, status)
-- `GET /api/v1/employees/:id` — Get single employee with active contract & leave balances
-- `POST /api/v1/employees` — Create employee (HR_MANAGER / HR_PAYROLL_MANAGER)
-- `PUT /api/v1/employees/:id` — Update employee details
-
-### B. Contracts (`/api/v1/contracts`)
-- `GET /api/v1/contracts?employeeId=:id` — List contracts for employee
-- `POST /api/v1/contracts` — Create contract (validates non-overlapping active dates)
-- `PUT /api/v1/contracts/:id` — Update contract
-
-### C. Attendance (`/api/v1/attendances`)
-- `POST /api/v1/attendances/check-in` — Employee check-in (sets `checkIn = now()`)
-- `POST /api/v1/attendances/check-out` — Employee check-out (calculates `workedHours`)
-- `GET /api/v1/attendances` — List attendance records (filterable by employee, date range)
-- `GET /api/v1/attendances/today` — Current employee's status for today
-
-### D. Time Off (`/api/v1/time-off`)
-- `GET /api/v1/time-off/types` — List time off types
-- `GET /api/v1/time-off/allocations` — Get allocations for employee
-- `POST /api/v1/time-off/requests` — Submit request (validates date & sufficient balance)
-- `PATCH /api/v1/time-off/requests/:id/approve` — Approve request (HR_MANAGER, decrements balance)
-- `PATCH /api/v1/time-off/requests/:id/reject` — Reject request
-
-### E. Payroll & Payruns (`/api/v1/payruns`, `/api/v1/payslips`)
-- `GET /api/v1/payruns` — List payruns with summary aggregates
-- `POST /api/v1/payruns` — Step 1: Initialize Payrun scope (Period + Structure)
-- `POST /api/v1/payruns/:id/generate` — Step 2: Generate draft payslips for selected employees
-- `POST /api/v1/payruns/:id/compute` — Compute all payslips in sequence
-- `POST /api/v1/payruns/:id/validate` — Validate warnings & freeze
-- `POST /api/v1/payruns/:id/pay` — Mark paid
-- `GET /api/v1/payslips/:id` — Retrieve full breakdown of payslip

@@ -4,51 +4,78 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { Sparkles, LayoutDashboard, LogOut } from 'lucide-react';
 
 export function Navbar() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" id="main-navbar">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2" id="navbar-logo">
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            Hackathon 2026
+    <nav
+      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md"
+      id="main-navbar"
+    >
+      <div className="container max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-8">
+        {/* Brand Logo matching ChronoTask Mockup Icon */}
+        <Link href="/" className="flex items-center space-x-3 group" id="navbar-logo">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+            <div className="grid grid-cols-2 gap-1 p-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-200"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+            </div>
+          </div>
+          <span className="text-xl font-bold tracking-tight text-foreground">
+            People<span className="text-blue-600">Pay360</span>
           </span>
         </Link>
 
-        <div className="flex items-center space-x-4">
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-3">
           {isLoading ? (
-            <div className="h-9 w-20 animate-pulse bg-muted rounded-md" />
+            <div className="h-9 w-24 animate-pulse bg-muted rounded-full" />
           ) : isAuthenticated ? (
             <>
               <Link href="/dashboard">
-                <Button variant="ghost" id="navbar-dashboard">Dashboard</Button>
+                <Button
+                  size="sm"
+                  className="rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2"
+                  id="navbar-dashboard"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Workspace</span>
+                </Button>
               </Link>
-              {user?.role === 'ADMIN' && (
-                <Link href="/admin">
-                  <Button variant="ghost" id="navbar-admin">Admin</Button>
-                </Link>
-              )}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground" id="navbar-user-email">
-                  {user?.email}
-                </span>
-                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full" id="navbar-user-role">
-                  {user?.role}
-                </span>
-              </div>
-              <Button variant="outline" onClick={logout} id="navbar-logout">
-                Logout
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="rounded-full text-muted-foreground hover:text-foreground"
+                id="navbar-logout"
+              >
+                <LogOut className="w-4 h-4" />
               </Button>
             </>
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" id="navbar-login">Login</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  id="navbar-login"
+                >
+                  Sign in
+                </Button>
               </Link>
-              <Link href="/register">
-                <Button id="navbar-register">Sign Up</Button>
+              <Link href="/login">
+                <Button
+                  size="sm"
+                  className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-5 shadow-sm shadow-blue-500/20 font-medium"
+                  id="navbar-get-demo"
+                >
+                  Enter Portal
+                </Button>
               </Link>
             </>
           )}
