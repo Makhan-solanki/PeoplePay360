@@ -1,0 +1,173 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  # ---- Lint & Typecheck ----
+  quality:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  # ---- Backend Tests ----
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hackathon
+          POSTGRES_PASSWORD: hackathon_secret
+          POSTGRES_DB: hackathon_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://hackathon:hackathon_secret@localhost:5432/hackathon_test?schema=public
+      JWT_SECRET: ci-test-jwt-secret-that-is-long-enough-32chars
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-that-is-long-enough-32chars
+      JWT_ACCESS_EXPIRY: 15m
+      JWT_REFRESH_EXPIRY: 7d
+      CORS_ORIGINS: http://localhost:3000
+      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_WINDOW_MINUTES: 15
+      NODE_ENV: test
+      PORT: 3001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx -w backend prisma migrate deploy
+      - run: npm run test -w backend
+
+  # ---- Frontend Tests ----
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test -w frontend
+
+  # ---- E2E Tests ----
+  test-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hackathon
+          POSTGRES_PASSWORD: hackathon_secret
+          POSTGRES_DB: hackathon_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://hackathon:hackathon_secret@localhost:5432/hackathon_db?schema=public
+      JWT_SECRET: ci-e2e-jwt-secret-that-is-long-enough-32chars
+      JWT_REFRESH_SECRET: ci-e2e-refresh-secret-that-is-long-enough-32chars
+      JWT_ACCESS_EXPIRY: 15m
+      JWT_REFRESH_EXPIRY: 7d
+      CORS_ORIGINS: http://localhost:3000
+      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_WINDOW_MINUTES: 15
+      NODE_ENV: test
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx -w backend prisma migrate deploy
+      - run: npx -w backend tsx prisma/seed.ts
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=chromium
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+
+  # ---- Build & Push Docker Images ----
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.backend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/backend:latest,${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/backend:${{ github.sha }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.frontend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/frontend:latest,${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/frontend:${{ github.sha }}
+
+  # ---- Deploy to Staging (placeholder) ----
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: staging
+    steps:
+      - name: Deploy
+        run: |
+          echo "🚀 Deploy step — replace with your deployment target"
+          echo "   Images available at:"
+          echo "   - ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/backend:${{ github.sha }}"
+          echo "   - ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/frontend:${{ github.sha }}"
+          # TODO: Add your deployment commands here (e.g., Railway, Fly.io, AWS ECS)

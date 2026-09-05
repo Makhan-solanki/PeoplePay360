@@ -1,0 +1,69 @@
+name: Continuous Deployment to AWS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Quality & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  migrate-db:
+    name: Apply Database Migrations
+    runs-on: ubuntu-latest
+    needs: test
+    if: secrets.DATABASE_URL != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run Prisma Migration
+        run: npx -w backend prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  build-and-push:
+    name: Build & Push to Amazon ECR
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: secrets.AWS_ACCESS_KEY_ID != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/hackathon-backend:latest -f Dockerfile.backend .
+          docker push $ECR_REGISTRY/hackathon-backend:latest
+
+      - name: Build & Push Frontend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/hackathon-frontend:latest -f Dockerfile.frontend .
+          docker push $ECR_REGISTRY/hackathon-frontend:latest

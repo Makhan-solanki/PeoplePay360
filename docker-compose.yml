@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hackathon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hackathon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hackathon_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-hackathon_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hackathon}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hackathon-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: hackathon-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hackathon}:${POSTGRES_PASSWORD:-hackathon_secret}@postgres:5432/${POSTGRES_DB:-hackathon_db}?schema=public
+      PORT: 3001
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-change_me_to_a_random_64_char_hex_string_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_to_a_different_random_hex_string}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-20}
+      RATE_LIMIT_WINDOW_MINUTES: ${RATE_LIMIT_WINDOW_MINUTES:-15}
+      AWS_REGION: ${AWS_REGION:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+    ports:
+      - "3001:3001"
+    networks:
+      - hackathon-net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: hackathon-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+    ports:
+      - "3000:3000"
+    networks:
+      - hackathon-net
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  hackathon-net:
+    driver: bridge

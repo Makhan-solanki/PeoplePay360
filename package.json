@@ -1,0 +1,31 @@
+{
+  "name": "hackathon-2026",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hackathon 2026 — Full-stack boilerplate",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "lint": "npm run lint -w backend && npm run lint -w frontend",
+    "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend",
+    "test": "npm run test -w backend && npm run test -w frontend",
+    "test:ci": "npm run test -w backend && npm run test -w frontend && npx playwright test --project=chromium",
+    "test:e2e": "npx playwright test",
+    "docker:up": "docker-compose up --build -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "db:migrate": "npm run db:migrate -w backend",
+    "db:seed": "npm run db:seed -w backend",
+    "db:studio": "npm run db:studio -w backend"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "concurrently": "^9.0.0"
+  }
+}

@@ -1,0 +1,28 @@
+// Prisma Schema — Hackathon 2026 Boilerplate
+// Domain-agnostic: only auth/user models. Extend with domain models during hackathon.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  role         Role     @default(USER)
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
