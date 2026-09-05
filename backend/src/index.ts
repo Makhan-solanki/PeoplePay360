@@ -11,6 +11,11 @@ import { requestIdMiddleware, errorHandler } from './middleware';
 import healthRoutes from './modules/health/health.routes';
 import authRoutes from './modules/auth/auth.routes';
 import uploadRoutes from './modules/upload/upload.routes';
+import employeeRoutes from './modules/employee/employee.routes';
+import contractRoutes from './modules/contract/contract.routes';
+import attendanceRoutes from './modules/attendance/attendance.routes';
+import timeOffRoutes from './modules/timeoff/timeoff.routes';
+import payrollRoutes from './modules/payroll/payroll.routes';
 
 const app = express();
 
@@ -22,7 +27,6 @@ app.use(
     customProps: (req) => ({
       requestId: (req as express.Request).requestId,
     }),
-    // Don't log health checks to avoid noise
     autoLogging: {
       ignore: (req) => req.url === '/api/health' || req.url === '/api/ready',
     },
@@ -43,6 +47,11 @@ app.use(cookieParser());
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/contracts', contractRoutes);
+app.use('/api/attendances', attendanceRoutes);
+app.use('/api/time-off', timeOffRoutes);
+app.use('/api/payroll', payrollRoutes);
 
 // ---- 404 Handler ----
 app.use((_req, res) => {
@@ -68,7 +77,6 @@ const gracefulShutdown = async (signal: string) => {
   server.close(async () => {
     logger.info('HTTP server closed');
 
-    // Import prisma here to avoid circular dependency issues
     const { default: prisma } = await import('./lib/prisma');
     await prisma.$disconnect();
     logger.info('Database connection closed');
@@ -76,7 +84,6 @@ const gracefulShutdown = async (signal: string) => {
     process.exit(0);
   });
 
-  // Force shutdown after 10 seconds
   setTimeout(() => {
     logger.error('Forced shutdown after timeout');
     process.exit(1);
@@ -86,7 +93,6 @@ const gracefulShutdown = async (signal: string) => {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// Handle uncaught errors
 process.on('unhandledRejection', (reason) => {
   logger.error({ reason }, 'Unhandled Promise Rejection');
 });
