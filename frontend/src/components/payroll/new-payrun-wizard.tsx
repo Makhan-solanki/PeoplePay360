@@ -215,7 +215,7 @@ export function NewPayrunWizard({ salaryStructures, onClose, onCreated }: NewPay
             <Button
               onClick={handleCreatePayrun}
               disabled={isSubmitting || selectedIds.size === 0}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               {isSubmitting ? 'Creating…' : 'Create payrun'}
             </Button>
@@ -268,7 +268,7 @@ export function NewPayrunWizard({ salaryStructures, onClose, onCreated }: NewPay
             <Button
               type="submit"
               disabled={isLoadingEmployees}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               {isLoadingEmployees ? 'Loading…' : 'Continue'}
             </Button>

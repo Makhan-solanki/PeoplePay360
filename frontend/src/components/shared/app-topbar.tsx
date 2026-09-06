@@ -120,7 +120,7 @@ export function AppTopbar() {
                 className={cn(
                   NAV_LINK_CLASS,
                   isActive(['/dashboard/employees', '/dashboard/working-schedules'])
-                    ? 'bg-white text-blue-600 shadow-sm'
+                    ? 'bg-white text-brand-600 shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
                 )}
               >
@@ -150,7 +150,7 @@ export function AppTopbar() {
               <button
                 className={cn(
                   NAV_LINK_CLASS,
-                  isActive('/dashboard/contracts') ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  isActive('/dashboard/contracts') ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 )}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -172,7 +172,7 @@ export function AppTopbar() {
             href="/dashboard/attendance"
             className={cn(
               NAV_LINK_CLASS,
-              isActive('/dashboard/attendance') ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              isActive('/dashboard/attendance') ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
             )}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -184,7 +184,7 @@ export function AppTopbar() {
               <button
                 className={cn(
                   NAV_LINK_CLASS,
-                  isActive('/dashboard/time-off') ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  isActive('/dashboard/time-off') ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 )}
               >
                 <Calendar className="w-3.5 h-3.5" />
@@ -213,7 +213,7 @@ export function AppTopbar() {
               <button
                 className={cn(
                   NAV_LINK_CLASS,
-                  isActive('/dashboard/payroll') ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  isActive('/dashboard/payroll') ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 )}
               >
                 <DollarSign className="w-3.5 h-3.5" />
@@ -258,7 +258,7 @@ export function AppTopbar() {
                   href={group.href}
                   className={cn(
                     'flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold',
-                    active ? 'bg-blue-50 text-blue-600' : 'text-slate-700 hover:bg-slate-50'
+                    active ? 'bg-brand-50 text-brand-600' : 'text-slate-700 hover:bg-slate-50'
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -271,7 +271,7 @@ export function AppTopbar() {
                 <div
                   className={cn(
                     'flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide',
-                    active ? 'text-blue-600' : 'text-slate-400'
+                    active ? 'text-brand-600' : 'text-slate-400'
                   )}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -286,7 +286,7 @@ export function AppTopbar() {
                         href={item.href}
                         className={cn(
                           'block px-3 py-2 rounded-xl text-sm font-medium',
-                          itemActive ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                          itemActive ? 'bg-brand-50 text-brand-600' : 'text-slate-600 hover:bg-slate-50'
                         )}
                       >
                         {item.label}
@@ -300,7 +300,7 @@ export function AppTopbar() {
 
           <div className="pt-2 mt-2 border-t border-slate-100 px-3">
             <div className="text-xs font-semibold text-slate-900 truncate">{user?.email}</div>
-            <div className="text-[10px] text-blue-600 font-medium">{user?.role}</div>
+            <div className="text-[10px] text-brand-600 font-medium">{user?.role}</div>
           </div>
         </nav>
       )}

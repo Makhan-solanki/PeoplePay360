@@ -138,7 +138,7 @@ export function NewRequestModal({ employees, types, onClose, onCreated }: NewReq
             <Button
               type="submit"
               disabled={isSubmitting || totalDays <= 0}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               {isSubmitting ? 'Submitting…' : 'Submit Request'}
             </Button>

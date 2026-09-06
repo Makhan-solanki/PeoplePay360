@@ -119,7 +119,7 @@ export default function PayslipsPage() {
           <Button
             onClick={() => setNotice('Payslips are generated from a Payrun — create one from Payroll ▶ Payruns.')}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
@@ -199,7 +199,7 @@ export default function PayslipsPage() {
                       </td>
                       <td className="p-3 text-slate-600">${slip.basicWage.toLocaleString()}</td>
                       <td className="p-3 text-slate-600">${slip.grossPay.toLocaleString()}</td>
-                      <td className="p-3 font-semibold text-blue-600">${slip.netPay.toLocaleString()}</td>
+                      <td className="p-3 font-semibold text-brand-600">${slip.netPay.toLocaleString()}</td>
                       <td className="p-3 text-slate-600">{slip.structureName}</td>
                       <td className="p-3 text-right">
                         <StatusBadge status={slip.status} label={slip.status === 'PAID' || slip.status === 'CONFIRMED' ? 'Done' : slip.status === 'DRAFT' ? 'Draft' : slip.status} />

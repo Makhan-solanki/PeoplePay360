@@ -118,13 +118,13 @@ export default function PayslipDetailPage() {
         )}
 
         <div className="flex flex-wrap items-center gap-2 print:hidden">
-          <Button onClick={handleCompute} disabled={isBusy} size="sm" className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={handleCompute} disabled={isBusy} size="sm" className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
             <RefreshCw className="w-3.5 h-3.5 mr-1" /> Compute
           </Button>
           <Button onClick={handleMarkPaid} disabled={isBusy || payslip.status === 'PAID'} variant="outline" size="sm" className="rounded-xl">
             <DollarSign className="w-3.5 h-3.5 mr-1" /> Mark Paid
           </Button>
-          <Button onClick={() => window.print()} size="sm" className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={() => window.print()} size="sm" className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
             <Printer className="w-3.5 h-3.5 mr-1" /> Print Payslip
           </Button>
         </div>
@@ -170,7 +170,7 @@ export default function PayslipDetailPage() {
         )}
 
         <div className="space-y-3">
-          <div className="text-sm font-bold text-blue-600">Salary Computation</div>
+          <div className="text-sm font-bold text-brand-600">Salary Computation</div>
           <div className="border border-slate-200 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
@@ -190,7 +190,7 @@ export default function PayslipDetailPage() {
                         item.category === 'GROSS'
                           ? 'bg-slate-50/80 font-bold text-slate-900'
                           : item.category === 'NET'
-                          ? 'bg-blue-50/50 font-bold text-blue-900'
+                          ? 'bg-brand-50/50 font-bold text-brand-900'
                           : item.category === 'DEDUCTION'
                           ? 'text-rose-600'
                           : 'text-slate-700'
@@ -210,12 +210,12 @@ export default function PayslipDetailPage() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 rounded-2xl text-white flex justify-between items-center shadow-lg shadow-blue-500/10 print:bg-none print:border print:border-slate-300 print:text-slate-900">
+        <div className="bg-gradient-to-r from-brand-600 to-indigo-700 p-5 rounded-2xl text-white flex justify-between items-center shadow-lg shadow-brand-500/10 print:bg-none print:border print:border-slate-300 print:text-slate-900">
           <div>
-            <div className="text-xs font-medium text-blue-100 print:text-slate-500">Final Net Disbursement</div>
+            <div className="text-xs font-medium text-brand-100 print:text-slate-500">Final Net Disbursement</div>
             <div className="text-2xl font-black">${payslip.netPay.toLocaleString()}</div>
           </div>
-          <div className="text-right text-xs text-blue-100 print:text-slate-500">
+          <div className="text-right text-xs text-brand-100 print:text-slate-500">
             <div>Bank: {payslip.employee.bankName || 'Missing'}</div>
             <div>A/C: {payslip.employee.bankAccountNo || 'Missing'}</div>
           </div>

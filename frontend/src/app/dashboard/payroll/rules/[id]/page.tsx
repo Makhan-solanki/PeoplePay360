@@ -124,7 +124,7 @@ export default function SalaryRuleDetailPage() {
             <Button variant="outline" size="sm" onClick={cancelEdit} disabled={isSaving} className="rounded-xl">
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
-            <Button size="sm" onClick={saveEdit} disabled={isSaving} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+            <Button size="sm" onClick={saveEdit} disabled={isSaving} className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
               <Check className="w-3.5 h-3.5 mr-1" /> {isSaving ? 'Saving…' : 'Save'}
             </Button>
           </div>
@@ -197,12 +197,12 @@ export default function SalaryRuleDetailPage() {
         </div>
 
         <div className="space-y-3">
-          <div className="text-sm font-bold text-blue-600">Computation options from the source</div>
+          <div className="text-sm font-bold text-brand-600">Computation options from the source</div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div
               className={cn(
                 'rounded-xl border p-3 space-y-1',
-                method === 'FIXED' ? 'border-blue-300 bg-blue-50/60' : 'border-slate-200 bg-slate-50'
+                method === 'FIXED' ? 'border-brand-300 bg-brand-50/60' : 'border-slate-200 bg-slate-50'
               )}
             >
               <div className="text-xs font-semibold text-slate-700">Fixed Amount</div>
@@ -213,7 +213,7 @@ export default function SalaryRuleDetailPage() {
             <div
               className={cn(
                 'rounded-xl border p-3 space-y-1',
-                method === 'PERCENTAGE' ? 'border-blue-300 bg-blue-50/60' : 'border-slate-200 bg-slate-50'
+                method === 'PERCENTAGE' ? 'border-brand-300 bg-brand-50/60' : 'border-slate-200 bg-slate-50'
               )}
             >
               <div className="text-xs font-semibold text-slate-700">Percentage of Wage</div>
@@ -226,7 +226,7 @@ export default function SalaryRuleDetailPage() {
             <div
               className={cn(
                 'rounded-xl border p-3 space-y-1',
-                method === 'FORMULA' ? 'border-blue-300 bg-blue-50/60' : 'border-slate-200 bg-slate-50'
+                method === 'FORMULA' ? 'border-brand-300 bg-brand-50/60' : 'border-slate-200 bg-slate-50'
               )}
             >
               <div className="text-xs font-semibold text-slate-700">Python Code</div>

@@ -71,7 +71,7 @@ export function NewStructureModal({ onClose, onCreated }: NewStructureModalProps
             <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" disabled={isSubmitting} className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
               {isSubmitting ? 'Creating…' : 'Create Structure'}
             </Button>
           </div>

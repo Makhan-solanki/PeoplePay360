@@ -102,7 +102,7 @@ export default function AttendancePage() {
             <Button
               onClick={() => setShowCheckInModal(true)}
               size="sm"
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
             >
               <PlusCircle className="w-4 h-4" />
               <span>New</span>
@@ -122,8 +122,8 @@ export default function AttendancePage() {
             onClick={() => setTodayOnly((v) => !v)}
             className={`flex items-center gap-1.5 px-3.5 h-10 rounded-xl border text-xs font-semibold transition-all whitespace-nowrap ${
               todayOnly
-                ? 'bg-blue-50 border-blue-300 text-blue-700'
-                : 'bg-white border-slate-200 text-slate-600 hover:border-blue-200'
+                ? 'bg-brand-50 border-brand-300 text-brand-700'
+                : 'bg-white border-slate-200 text-slate-600 hover:border-brand-200'
             }`}
           >
             <CalendarCheck className="w-3.5 h-3.5" />
@@ -132,7 +132,7 @@ export default function AttendancePage() {
           {filteredEmployee && (
             <button
               onClick={clearEmployeeFilter}
-              className="flex items-center gap-1.5 px-3.5 h-10 rounded-xl border border-blue-300 bg-blue-50 text-blue-700 text-xs font-semibold whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3.5 h-10 rounded-xl border border-brand-300 bg-brand-50 text-brand-700 text-xs font-semibold whitespace-nowrap"
             >
               Employee: {filteredEmployee.firstName}
               <X className="w-3.5 h-3.5" />
@@ -181,7 +181,7 @@ export default function AttendancePage() {
                     <td className="p-3 text-slate-600">
                       {att.checkOut ? new Date(att.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
                     </td>
-                    <td className="p-3 font-semibold text-blue-600">{att.workedHours.toFixed(2)}</td>
+                    <td className="p-3 font-semibold text-brand-600">{att.workedHours.toFixed(2)}</td>
                     <td className="p-3 text-right">
                       <StatusBadge status={att.status} />
                     </td>

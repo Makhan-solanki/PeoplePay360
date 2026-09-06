@@ -156,7 +156,7 @@ export function AttendanceWidget() {
                   </div>
                   <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-200">
                     <span className="text-slate-500">Today</span>
-                    <span className="font-semibold text-blue-600">
+                    <span className="font-semibold text-brand-600">
                       {today?.workedHours ? `${today.workedHours}h` : isCheckedIn ? elapsedLabel() : '0h'}
                     </span>
                   </div>
@@ -173,7 +173,7 @@ export function AttendanceWidget() {
                   disabled={isLoading}
                   className={cn(
                     'w-full rounded-xl text-sm h-11 font-semibold text-white',
-                    isCheckedIn ? 'bg-slate-900 hover:bg-slate-800' : 'bg-blue-600 hover:bg-blue-700'
+                    isCheckedIn ? 'bg-slate-900 hover:bg-slate-800' : 'bg-brand-600 hover:bg-brand-700'
                   )}
                 >
                   {isLoading ? '…' : isCheckedIn ? 'Check Out' : 'Check In'}

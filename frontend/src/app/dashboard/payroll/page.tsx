@@ -432,7 +432,7 @@ export default function PayrollDashboardPage() {
               </div>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1">
-              <div className="flex items-center gap-1.5 text-blue-600">
+              <div className="flex items-center gap-1.5 text-brand-600">
                 <FileText className="w-3.5 h-3.5" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Payslips Generated</span>
               </div>
@@ -450,7 +450,7 @@ export default function PayrollDashboardPage() {
               <div className="text-[10px] text-slate-400">Based on generated payslips</div>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1">
-              <div className="flex items-center gap-1.5 text-blue-600">
+              <div className="flex items-center gap-1.5 text-brand-600">
                 <Calendar className="w-3.5 h-3.5" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Approved Time Off Days</span>
               </div>

@@ -184,7 +184,7 @@ export default function EmployeeDetailPage() {
               size="sm"
               onClick={handleSave}
               disabled={isSaving}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               <Check className="w-3.5 h-3.5 mr-1" /> {isSaving ? 'Saving…' : 'Save'}
             </Button>
@@ -228,7 +228,7 @@ export default function EmployeeDetailPage() {
               </h1>
               <StatusBadge status={employee.status} />
             </div>
-            <div className="text-xs text-blue-600 font-medium">
+            <div className="text-xs text-brand-600 font-medium">
               {employee.jobPosition} • {employee.department}
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 pt-1">
@@ -251,7 +251,7 @@ export default function EmployeeDetailPage() {
               <button
                 onClick={() => setInfoTab('work')}
                 className={`pb-3 text-sm font-semibold transition-colors border-b-2 -mb-px whitespace-nowrap ${
-                  infoTab === 'work' ? 'text-blue-600 border-blue-600' : 'text-slate-400 border-transparent hover:text-slate-700'
+                  infoTab === 'work' ? 'text-brand-600 border-brand-600' : 'text-slate-400 border-transparent hover:text-slate-700'
                 }`}
               >
                 Work Information
@@ -259,7 +259,7 @@ export default function EmployeeDetailPage() {
               <button
                 onClick={() => setInfoTab('private')}
                 className={`pb-3 text-sm font-semibold transition-colors border-b-2 -mb-px whitespace-nowrap ${
-                  infoTab === 'private' ? 'text-blue-600 border-blue-600' : 'text-slate-400 border-transparent hover:text-slate-700'
+                  infoTab === 'private' ? 'text-brand-600 border-brand-600' : 'text-slate-400 border-transparent hover:text-slate-700'
                 }`}
               >
                 Private Information
@@ -293,7 +293,7 @@ export default function EmployeeDetailPage() {
                   ) : employee.schedule ? (
                     <Link
                       href={`/dashboard/working-schedules/${employee.schedule.id}`}
-                      className="flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-blue-600 font-medium hover:underline"
+                      className="flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-brand-600 font-medium hover:underline"
                     >
                       {employee.schedule.name}
                     </Link>

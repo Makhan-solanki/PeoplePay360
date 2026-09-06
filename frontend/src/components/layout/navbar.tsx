@@ -17,16 +17,16 @@ export function Navbar() {
       <div className="container max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-8">
         {/* Brand Logo matching ChronoTask Mockup Icon */}
         <Link href="/" className="flex items-center space-x-3 group" id="navbar-logo">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
             <div className="grid grid-cols-2 gap-1 p-1">
               <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-200"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-200"></div>
               <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
               <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
             </div>
           </div>
           <span className="text-xl font-bold tracking-tight text-foreground">
-            People<span className="text-blue-600">Pay360</span>
+            People<span className="text-brand-600">Pay360</span>
           </span>
         </Link>
 
@@ -39,7 +39,7 @@ export function Navbar() {
               <Link href="/dashboard">
                 <Button
                   size="sm"
-                  className="rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2"
+                  className="rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2"
                   id="navbar-dashboard"
                 >
                   <LayoutDashboard className="w-4 h-4" />
@@ -71,7 +71,7 @@ export function Navbar() {
               <Link href="/login">
                 <Button
                   size="sm"
-                  className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-5 shadow-sm shadow-blue-500/20 font-medium"
+                  className="rounded-full bg-brand-600 hover:bg-brand-700 text-white px-5 shadow-sm shadow-brand-500/20 font-medium"
                   id="navbar-get-demo"
                 >
                   Enter Portal

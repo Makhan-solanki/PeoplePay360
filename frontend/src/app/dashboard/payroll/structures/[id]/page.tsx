@@ -106,7 +106,7 @@ export default function SalaryStructureDetailPage() {
             <Button variant="outline" size="sm" onClick={cancelEdit} disabled={isSaving} className="rounded-xl">
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
-            <Button size="sm" onClick={saveEdit} disabled={isSaving} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+            <Button size="sm" onClick={saveEdit} disabled={isSaving} className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
               <Check className="w-3.5 h-3.5 mr-1" /> {isSaving ? 'Saving…' : 'Save'}
             </Button>
           </div>
@@ -149,7 +149,7 @@ export default function SalaryStructureDetailPage() {
         </div>
 
         <div className="space-y-3">
-          <div className="text-sm font-bold text-blue-600">Salary Rules</div>
+          <div className="text-sm font-bold text-brand-600">Salary Rules</div>
           <div className="border border-slate-200 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">

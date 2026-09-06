@@ -131,14 +131,14 @@ export function NewRuleModal({ structures, defaultStructureId, onClose, onCreate
                 <button
                   type="button"
                   onClick={() => setMethod('PERCENTAGE')}
-                  className={`flex-1 h-9 rounded-xl text-xs font-semibold border ${method === 'PERCENTAGE' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-200 text-slate-600'}`}
+                  className={`flex-1 h-9 rounded-xl text-xs font-semibold border ${method === 'PERCENTAGE' ? 'bg-brand-50 border-brand-300 text-brand-700' : 'border-slate-200 text-slate-600'}`}
                 >
                   Percentage of Wage
                 </button>
                 <button
                   type="button"
                   onClick={() => setMethod('FIXED')}
-                  className={`flex-1 h-9 rounded-xl text-xs font-semibold border ${method === 'FIXED' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-200 text-slate-600'}`}
+                  className={`flex-1 h-9 rounded-xl text-xs font-semibold border ${method === 'FIXED' ? 'bg-brand-50 border-brand-300 text-brand-700' : 'border-slate-200 text-slate-600'}`}
                 >
                   Fixed Amount
                 </button>
@@ -155,7 +155,7 @@ export function NewRuleModal({ structures, defaultStructureId, onClose, onCreate
             <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" disabled={isSubmitting} className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
               {isSubmitting ? 'Creating…' : 'Create Rule'}
             </Button>
           </div>

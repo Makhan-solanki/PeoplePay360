@@ -69,11 +69,11 @@ export default function DepartmentsPage() {
             <Link
               key={dept.name}
               href={`/dashboard/employees?search=${encodeURIComponent(dept.name)}`}
-              className="block bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all space-y-4"
+              className="block bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-brand-200 transition-all space-y-4"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 shrink-0 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center">
-                  <Building2 className="w-4 h-4 text-blue-600" />
+                <div className="w-9 h-9 shrink-0 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center">
+                  <Building2 className="w-4 h-4 text-brand-600" />
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-slate-900 text-sm leading-tight truncate">{dept.name}</div>

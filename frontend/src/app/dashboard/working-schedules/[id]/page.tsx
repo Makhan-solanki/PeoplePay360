@@ -169,7 +169,7 @@ export default function WorkingScheduleFormPage() {
               <Button variant="outline" size="sm" onClick={cancelEdit} disabled={isSaving} className="rounded-xl">
                 <X className="w-3.5 h-3.5 mr-1" /> Cancel
               </Button>
-              <Button size="sm" onClick={handleSave} disabled={isSaving} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+              <Button size="sm" onClick={handleSave} disabled={isSaving} className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
                 <Check className="w-3.5 h-3.5 mr-1" /> {isSaving ? 'Saving…' : 'Save'}
               </Button>
             </div>
@@ -322,7 +322,7 @@ export default function WorkingScheduleFormPage() {
                           className="h-8 w-20 rounded-lg border border-slate-200 bg-background px-2 text-xs disabled:bg-transparent disabled:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         />
                       </td>
-                      <td className="p-2.5 font-semibold text-blue-600">
+                      <td className="p-2.5 font-semibold text-brand-600">
                         {computeDayHours(d.startTime, d.endTime, d.breakMinutes)}h
                       </td>
                       {isEditing && (
@@ -357,7 +357,7 @@ export default function WorkingScheduleFormPage() {
             <Button
               onClick={handleSave}
               disabled={isSaving || !name.trim()}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               {isSaving ? 'Creating…' : 'Create Schedule'}
             </Button>

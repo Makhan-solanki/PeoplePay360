@@ -214,7 +214,7 @@ export default function ContractFormPage() {
               <Button variant="outline" size="sm" onClick={cancelEdit} disabled={isSaving} className="rounded-xl">
                 <X className="w-3.5 h-3.5 mr-1" /> Cancel
               </Button>
-              <Button size="sm" onClick={handleSave} disabled={isSaving} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+              <Button size="sm" onClick={handleSave} disabled={isSaving} className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white">
                 <Check className="w-3.5 h-3.5 mr-1" /> {isSaving ? 'Saving…' : 'Save'}
               </Button>
             </div>
@@ -387,7 +387,7 @@ export default function ContractFormPage() {
             Structure Type: <span className="font-medium text-slate-700">{selectedStructure?.name ?? '—'}</span>
           </p>
           {form.status === 'ACTIVE' && (
-            <p className="text-xs text-blue-600 font-medium pt-1">
+            <p className="text-xs text-brand-600 font-medium pt-1">
               This running contract is the source for payroll calculation in the active period.
             </p>
           )}
@@ -398,7 +398,7 @@ export default function ContractFormPage() {
             <Button
               onClick={handleSave}
               disabled={isSaving || !form.employeeId}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               {isSaving ? 'Creating…' : 'Create Contract'}
             </Button>

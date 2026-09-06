@@ -31,8 +31,8 @@ const CATEGORY_TONE: Record<string, string> = {
   BASIC: 'bg-slate-100 text-slate-700',
   ALLOWANCE: 'bg-emerald-100 text-emerald-800',
   DEDUCTION: 'bg-rose-100 text-rose-800',
-  GROSS: 'bg-blue-100 text-blue-800',
-  NET: 'bg-blue-100 text-blue-800',
+  GROSS: 'bg-brand-100 text-brand-800',
+  NET: 'bg-brand-100 text-brand-800',
 };
 
 export default function SalaryRulesPage() {
@@ -86,7 +86,7 @@ export default function SalaryRulesPage() {
             onClick={() => setShowCreateModal(true)}
             disabled={structures.length === 0}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
@@ -104,7 +104,7 @@ export default function SalaryRulesPage() {
           {structureFilter && (
             <button
               onClick={() => router.push('/dashboard/payroll/rules')}
-              className="flex items-center gap-1.5 px-3.5 h-10 rounded-xl border border-blue-300 bg-blue-50 text-blue-700 text-xs font-semibold whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3.5 h-10 rounded-xl border border-brand-300 bg-brand-50 text-brand-700 text-xs font-semibold whitespace-nowrap"
             >
               {structureFilter.structureName}
               <X className="w-3.5 h-3.5" />
@@ -144,7 +144,7 @@ export default function SalaryRulesPage() {
                     <td className="p-3 font-medium text-slate-800">{r.name}</td>
                     <td className="p-3 text-slate-500 font-mono">{r.code}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${CATEGORY_TONE[r.category] ?? 'bg-blue-100 text-blue-800'}`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${CATEGORY_TONE[r.category] ?? 'bg-brand-100 text-brand-800'}`}>
                         {r.category}
                       </span>
                     </td>

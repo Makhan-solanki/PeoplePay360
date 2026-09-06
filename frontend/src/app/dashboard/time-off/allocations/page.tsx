@@ -92,7 +92,7 @@ export default function AllocationsPage() {
             onClick={() => setShowCreateModal(true)}
             disabled={types.length === 0}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
@@ -145,7 +145,7 @@ export default function AllocationsPage() {
                     <td className="p-3 text-slate-600">{a.timeOffType.name}</td>
                     <td className="p-3 text-slate-600">{a.allocatedDays} days</td>
                     <td className="p-3 text-slate-600">{a.usedDays} days</td>
-                    <td className="p-3 font-semibold text-blue-600">{a.allocatedDays - a.usedDays} days</td>
+                    <td className="p-3 font-semibold text-brand-600">{a.allocatedDays - a.usedDays} days</td>
                     <td className="p-3 text-right">
                       <StatusBadge status={a.status} />
                     </td>

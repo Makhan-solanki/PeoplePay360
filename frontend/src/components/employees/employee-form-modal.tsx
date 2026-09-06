@@ -116,7 +116,7 @@ export function EmployeeFormModal({ onClose, onCreated }: EmployeeFormModalProps
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               {isSubmitting ? 'Creating…' : 'Create Employee'}
             </Button>

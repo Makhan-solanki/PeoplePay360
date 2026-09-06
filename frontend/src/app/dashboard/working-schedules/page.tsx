@@ -73,7 +73,7 @@ export default function WorkingSchedulesPage() {
           <Button
             onClick={() => router.push('/dashboard/working-schedules/new')}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New Schedule</span>
@@ -92,7 +92,7 @@ export default function WorkingSchedulesPage() {
             <button
               onClick={() => setView('list')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                view === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                view === 'list' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <ListIcon className="w-3.5 h-3.5" />
@@ -101,7 +101,7 @@ export default function WorkingSchedulesPage() {
             <button
               onClick={() => setView('calendar')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                view === 'calendar' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                view === 'calendar' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <CalendarIcon className="w-3.5 h-3.5" />
@@ -178,7 +178,7 @@ export default function WorkingSchedulesPage() {
                       {WEEK_DAYS.map((d) => (
                         <td key={d} className="p-3 text-center">
                           {hoursByDay[d] != null ? (
-                            <span className="text-blue-600 font-semibold">{hoursByDay[d]}h</span>
+                            <span className="text-brand-600 font-semibold">{hoursByDay[d]}h</span>
                           ) : (
                             <span className="text-slate-300">—</span>
                           )}

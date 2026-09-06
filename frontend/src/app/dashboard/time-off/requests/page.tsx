@@ -125,7 +125,7 @@ export default function TimeOffRequestsPage() {
           <Button
             onClick={() => setShowNewModal(true)}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
@@ -143,7 +143,7 @@ export default function TimeOffRequestsPage() {
           <button
             onClick={() => setMyTeamOnly((v) => !v)}
             className={`flex items-center gap-1.5 px-3.5 h-10 rounded-xl border text-xs font-semibold transition-all whitespace-nowrap ${
-              myTeamOnly ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-200'
+              myTeamOnly ? 'bg-brand-50 border-brand-300 text-brand-700' : 'bg-white border-slate-200 text-slate-600 hover:border-brand-200'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ export default function TimeOffRequestsPage() {
                     <td className="p-3 text-slate-600">{req.timeOffType.name}</td>
                     <td className="p-3 text-slate-600">{new Date(req.startDate).toLocaleDateString()}</td>
                     <td className="p-3 text-slate-600">{new Date(req.endDate).toLocaleDateString()}</td>
-                    <td className="p-3 font-medium text-blue-600">{req.totalDays} {req.totalDays === 1 ? 'Day' : 'Days'}</td>
+                    <td className="p-3 font-medium text-brand-600">{req.totalDays} {req.totalDays === 1 ? 'Day' : 'Days'}</td>
                     <td className="p-3">
                       <StatusBadge status={req.status} />
                     </td>
@@ -199,7 +199,7 @@ export default function TimeOffRequestsPage() {
                           <Button
                             onClick={() => handleApprove(req.id)}
                             size="sm"
-                            className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-7 text-[11px] px-2"
+                            className="bg-brand-600 hover:bg-brand-700 text-white rounded-lg h-7 text-[11px] px-2"
                           >
                             <Check className="w-3 h-3 mr-1" /> Approve
                           </Button>

@@ -68,7 +68,7 @@ export default function EmployeesPage() {
           <Button
             onClick={() => setShowCreateModal(true)}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
@@ -88,7 +88,7 @@ export default function EmployeesPage() {
             <button
               onClick={() => setView('kanban')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                view === 'kanban' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                view === 'kanban' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -97,7 +97,7 @@ export default function EmployeesPage() {
             <button
               onClick={() => setView('list')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                view === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                view === 'list' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <ListIcon className="w-3.5 h-3.5" />
@@ -122,7 +122,7 @@ export default function EmployeesPage() {
             <button
               key={emp.id}
               onClick={() => router.push(`/dashboard/employees/${emp.id}`)}
-              className="text-left bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all space-y-4"
+              className="text-left bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-brand-200 transition-all space-y-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -131,7 +131,7 @@ export default function EmployeesPage() {
                     <div className="font-bold text-slate-900 text-sm leading-tight">
                       {emp.firstName} {emp.lastName}
                     </div>
-                    <div className="text-xs text-blue-600 font-medium">{emp.jobPosition}</div>
+                    <div className="text-xs text-brand-600 font-medium">{emp.jobPosition}</div>
                   </div>
                 </div>
               </div>

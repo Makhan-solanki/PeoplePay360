@@ -141,7 +141,7 @@ export default function PayrunDetailPage() {
               size="sm"
               className={
                 payrun.status === 'DRAFT' || payrun.status === 'COMPUTED'
-                  ? 'rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold'
+                  ? 'rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold'
                   : 'rounded-xl text-xs font-semibold'
               }
               variant={payrun.status === 'DRAFT' || payrun.status === 'COMPUTED' ? undefined : 'outline'}
@@ -203,7 +203,7 @@ export default function PayrunDetailPage() {
         </div>
 
         <div className="space-y-2 pt-2 border-t border-slate-100">
-          <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+          <div className="text-xs font-semibold text-brand-600 uppercase tracking-wider">
             Payslips in this Payrun ({payrun.payslips.length})
           </div>
 
@@ -252,7 +252,7 @@ export default function PayrunDetailPage() {
                           <td className="p-3 text-right">
                             <Link
                               href={`/dashboard/payroll/payslips/${slip.id}`}
-                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold"
+                              className="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold"
                             >
                               <FileText className="w-3.5 h-3.5" /> PDF
                             </Link>

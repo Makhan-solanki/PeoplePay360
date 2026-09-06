@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 const PALETTE = [
-  'bg-blue-50 text-blue-700 border-blue-100',
+  'bg-brand-50 text-brand-700 border-brand-100',
   'bg-violet-50 text-violet-700 border-violet-100',
   'bg-emerald-50 text-emerald-700 border-emerald-100',
   'bg-amber-50 text-amber-700 border-amber-100',

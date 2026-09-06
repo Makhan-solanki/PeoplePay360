@@ -82,7 +82,7 @@ export default function PayrunsPage() {
           <Button
             onClick={() => setShowWizard(true)}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
@@ -128,7 +128,7 @@ export default function PayrunsPage() {
               <div
                 key={p.id}
                 onClick={() => router.push(`/dashboard/payroll/payruns/${p.id}`)}
-                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:border-blue-200 hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-4"
+                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:border-brand-200 hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-4"
               >
                 <div>
                   <div className="font-bold text-slate-900">{p.name}</div>
@@ -155,7 +155,7 @@ export default function PayrunsPage() {
                     e.stopPropagation();
                     router.push(`/dashboard/payroll/payruns/${p.id}`);
                   }}
-                  className="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"
+                  className="w-8 h-8 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-600 flex items-center justify-center shrink-0"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>

@@ -8,7 +8,7 @@ const TONE_CLASSES: Record<Tone, string> = {
   amber: 'bg-amber-100 text-amber-800',
   rose: 'bg-rose-100 text-rose-800',
   slate: 'bg-slate-100 text-slate-600',
-  blue: 'bg-blue-100 text-blue-800',
+  blue: 'bg-brand-100 text-brand-800',
 };
 
 const STATUS_TONE: Record<string, Tone> = {
@@ -51,7 +51,7 @@ export function StatusBadge({ status, label, className }: StatusBadgeProps) {
           'bg-amber-500': tone === 'amber',
           'bg-rose-500': tone === 'rose',
           'bg-slate-400': tone === 'slate',
-          'bg-blue-500': tone === 'blue',
+          'bg-brand-500': tone === 'blue',
         })}
       />
       {label ?? status.replace(/_/g, ' ')}

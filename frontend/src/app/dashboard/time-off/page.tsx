@@ -104,7 +104,7 @@ export default function TimeOffDashboardPage() {
           <div className="text-2xl font-bold text-slate-900">{approvedThisMonth}</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-1">
-          <div className="flex items-center gap-2 text-blue-600">
+          <div className="flex items-center gap-2 text-brand-600">
             <Users className="w-4 h-4" />
             <span className="text-[10px] font-semibold uppercase tracking-wide">On Leave Today</span>
           </div>
@@ -118,7 +118,7 @@ export default function TimeOffDashboardPage() {
             <h2 className="text-sm font-bold text-slate-900">Pending Approvals</h2>
             <p className="text-xs text-slate-500">Requests waiting on a decision.</p>
           </div>
-          <Link href="/dashboard/time-off/requests" className="text-xs font-semibold text-blue-600 hover:underline">
+          <Link href="/dashboard/time-off/requests" className="text-xs font-semibold text-brand-600 hover:underline">
             View all requests
           </Link>
         </div>
@@ -151,12 +151,12 @@ export default function TimeOffDashboardPage() {
                     <td className="p-3 text-slate-600">{req.timeOffType.name}</td>
                     <td className="p-3 text-slate-600">{new Date(req.startDate).toLocaleDateString()}</td>
                     <td className="p-3 text-slate-600">{new Date(req.endDate).toLocaleDateString()}</td>
-                    <td className="p-3 font-medium text-blue-600">{req.totalDays} {req.totalDays === 1 ? 'Day' : 'Days'}</td>
+                    <td className="p-3 font-medium text-brand-600">{req.totalDays} {req.totalDays === 1 ? 'Day' : 'Days'}</td>
                     <td className="p-3 text-right space-x-2">
                       <Button
                         onClick={() => handleApprove(req.id)}
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-7 text-[11px] px-2"
+                        className="bg-brand-600 hover:bg-brand-700 text-white rounded-lg h-7 text-[11px] px-2"
                       >
                         <Check className="w-3 h-3 mr-1" /> Approve
                       </Button>

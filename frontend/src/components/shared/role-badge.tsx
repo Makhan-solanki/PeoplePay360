@@ -12,7 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const ROLE_META: Record<string, { abbr: string; classes: string }> = {
-  EMPLOYEE: { abbr: 'EMP', classes: 'bg-blue-50 text-blue-700 border-blue-100' },
+  EMPLOYEE: { abbr: 'EMP', classes: 'bg-brand-50 text-brand-700 border-brand-100' },
   HR_MANAGER: { abbr: 'HR', classes: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
   HR_PAYROLL_MANAGER: { abbr: 'PAY', classes: 'bg-amber-50 text-amber-700 border-amber-100' },
 };

@@ -18,7 +18,7 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFBFD] text-[#1E293B] relative overflow-hidden font-sans selection:bg-blue-500/20">
+    <div className="min-h-screen flex flex-col bg-[#FAFBFD] text-[#1E293B] relative overflow-hidden font-sans selection:bg-brand-500/20">
       {/* Subtle Dot Grid Pattern */}
       <div className="absolute inset-0 dot-pattern opacity-60 pointer-events-none" />
 
@@ -29,7 +29,7 @@ export default function HomePage() {
         <div className="mb-8 flex items-center justify-center">
           <div className="w-16 h-16 rounded-2xl bg-white shadow-xl shadow-slate-200/80 border border-slate-100 flex items-center justify-center p-3 animate-bounce-subtle">
             <div className="grid grid-cols-2 gap-2">
-              <div className="w-3.5 h-3.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-brand-500 shadow-sm shadow-brand-500/40"></div>
               <div className="w-3.5 h-3.5 rounded-full bg-slate-900"></div>
               <div className="w-3.5 h-3.5 rounded-full bg-slate-900"></div>
               <div className="w-3.5 h-3.5 rounded-full bg-slate-900"></div>
@@ -52,7 +52,7 @@ export default function HomePage() {
             <Link href="/login">
               <Button
                 size="lg"
-                className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-6 text-base shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2"
+                className="rounded-full bg-brand-600 hover:bg-brand-700 text-white font-medium px-8 py-6 text-base shadow-lg shadow-brand-500/25 transition-all hover:scale-[1.02] flex items-center gap-2"
                 id="hero-cta-btn"
               >
                 <span>Get free demo</span>
@@ -82,7 +82,7 @@ export default function HomePage() {
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xl shadow-slate-200/60 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 text-slate-800 font-semibold text-sm">
-                <Clock className="w-4 h-4 text-blue-600" />
+                <Clock className="w-4 h-4 text-brand-600" />
                 <span>Attendance Log</span>
               </div>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
@@ -91,7 +91,7 @@ export default function HomePage() {
               <div className="text-xs text-slate-500">Today&apos;s Status</div>
               <div className="text-sm font-bold text-slate-800 flex items-center justify-between mt-1">
                 <span>09:00 AM — In</span>
-                <span className="text-xs text-blue-600 font-medium">8.0 hrs</span>
+                <span className="text-xs text-brand-600 font-medium">8.0 hrs</span>
               </div>
             </div>
             <div className="text-xs text-slate-400">Auto-calculates daily hours & half-days</div>
@@ -108,9 +108,9 @@ export default function HomePage() {
             </div>
             <div className="mt-3 space-y-1.5 text-xs text-slate-600">
               <div className="flex justify-between"><span>Basic:</span> <span className="font-medium text-slate-900">$6,000</span></div>
-              <div className="flex justify-between text-blue-600"><span>+ HRA & TRA:</span> <span className="font-medium">+$1,400</span></div>
+              <div className="flex justify-between text-brand-600"><span>+ HRA & TRA:</span> <span className="font-medium">+$1,400</span></div>
               <div className="flex justify-between text-rose-500"><span>- PF & Tax:</span> <span className="font-medium">-$1,460</span></div>
-              <div className="flex justify-between pt-1 border-t border-slate-100 font-bold text-slate-900"><span>Net Pay:</span> <span className="text-blue-600">$5,940</span></div>
+              <div className="flex justify-between pt-1 border-t border-slate-100 font-bold text-slate-900"><span>Net Pay:</span> <span className="text-brand-600">$5,940</span></div>
             </div>
           </div>
         </div>
@@ -118,15 +118,15 @@ export default function HomePage() {
         {/* Bottom Quick Access Pills */}
         <div className="mt-14 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
-            <CheckSquare className="w-3.5 h-3.5 text-blue-600" />
+            <CheckSquare className="w-3.5 h-3.5 text-brand-600" />
             <span>Atomic Leave Balances</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
-            <UserCheck className="w-3.5 h-3.5 text-blue-600" />
+            <UserCheck className="w-3.5 h-3.5 text-brand-600" />
             <span>Role-Based Access (RBAC)</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
-            <Zap className="w-3.5 h-3.5 text-blue-600" />
+            <Zap className="w-3.5 h-3.5 text-brand-600" />
             <span>Pre-Payment Warnings</span>
           </div>
         </div>

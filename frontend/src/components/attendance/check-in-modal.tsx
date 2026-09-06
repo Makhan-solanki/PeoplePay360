@@ -75,7 +75,7 @@ export function CheckInModal({ employees, onClose, onCheckedIn }: CheckInModalPr
             <Button
               type="submit"
               disabled={isSubmitting || !employeeId}
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white"
             >
               {isSubmitting ? 'Checking in…' : 'Check In'}
             </Button>
