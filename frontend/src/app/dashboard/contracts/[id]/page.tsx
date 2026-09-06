@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmployeeSelect } from '@/components/shared/employee-select';
 import { api } from '@/lib/api';
 import { contractStatusLabel } from '@/lib/contract-status';
 import { ArrowLeft, Check, X, Pencil } from 'lucide-react';
@@ -233,18 +234,13 @@ export default function ContractFormPage() {
           <div className="space-y-1.5">
             <Label className="text-xs text-slate-400 font-medium">Employee</Label>
             {isEditing && isNew ? (
-              <select
+              <EmployeeSelect
+                employees={employees}
                 value={form.employeeId}
-                onChange={updateForm('employeeId')}
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="">Select employee…</option>
-                {employees.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.firstName} {e.lastName}
-                  </option>
-                ))}
-              </select>
+                onChange={(id) =>
+                  updateForm('employeeId')({ target: { value: id } } as React.ChangeEvent<HTMLSelectElement>)
+                }
+              />
             ) : (
               <Input
                 disabled
@@ -368,9 +364,9 @@ export default function ContractFormPage() {
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-xs text-slate-400 font-medium">Salary Structure</Label>
-          {isEditing ? (
+        {isEditing && (
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-400 font-medium">Salary Structure</Label>
             <select
               value={form.salaryStructureId}
               onChange={updateForm('salaryStructureId')}
@@ -382,19 +378,13 @@ export default function ContractFormPage() {
                 </option>
               ))}
             </select>
-          ) : (
-            <Input
-              disabled
-              value={selectedStructure?.name ?? '—'}
-              className="rounded-xl border-slate-200 disabled:opacity-100 disabled:bg-slate-50 disabled:text-slate-700"
-            />
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-1">
           <div className="text-xs font-semibold text-slate-700">Salary Structure / Notes</div>
           <p className="text-xs text-slate-500 leading-relaxed">
-            {selectedStructure?.description || 'Structure defines the sequential rule pipeline used at payroll time.'}
+            Structure Type: <span className="font-medium text-slate-700">{selectedStructure?.name ?? '—'}</span>
           </p>
           {form.status === 'ACTIVE' && (
             <p className="text-xs text-blue-600 font-medium pt-1">

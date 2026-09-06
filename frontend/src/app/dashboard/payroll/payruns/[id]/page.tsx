@@ -1,25 +1,25 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/shared/status-badge';
-import { ArrowLeft, CheckCircle2, DollarSign, AlertCircle, RefreshCw } from 'lucide-react';
-
-interface LineItem {
-  ruleCode: string;
-  name: string;
-  category: string;
-  amount: number;
-}
+import { shortWarningLabel } from '@/lib/payroll-warnings';
+import { ArrowLeft, CheckCircle2, DollarSign, AlertCircle, RefreshCw, Send, FileText } from 'lucide-react';
 
 interface Payslip {
   id: string;
-  netPay: number;
+  status: string;
+  workedDays: number;
   basicWage: number;
-  lineItems: LineItem[];
-  employee: { firstName: string; lastName: string; department: string; employeeCode: string; jobPosition: string; bankName: string | null; bankAccountNo: string | null };
+  grossPay: number;
+  netPay: number;
+  warnings: string[] | null;
+  employee: { firstName: string; lastName: string };
 }
 
 interface PayrunDetail {
@@ -31,7 +31,12 @@ interface PayrunDetail {
   totalGross: number;
   totalDeductions: number;
   totalNet: number;
+  salaryStructure: { name: string };
   payslips: Payslip[];
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 export default function PayrunDetailPage() {
@@ -39,19 +44,16 @@ export default function PayrunDetailPage() {
   const router = useRouter();
 
   const [payrun, setPayrun] = useState<PayrunDetail | null>(null);
-  const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
   const load = async () => {
     setIsLoading(true);
     const res = await api.get<PayrunDetail>(`/payroll/payruns/${id}`);
-    if (res.success && res.data) {
-      setPayrun(res.data);
-      setSelectedPayslip((prev) => res.data!.payslips.find((s) => s.id === prev?.id) ?? res.data!.payslips[0] ?? null);
-    }
+    if (res.success && res.data) setPayrun(res.data);
     setIsLoading(false);
   };
 
@@ -63,6 +65,7 @@ export default function PayrunDetailPage() {
   const runAction = async (action: () => Promise<any>, successMessage: string) => {
     setIsBusy(true);
     setActionError(null);
+    setActionSuccess(null);
     try {
       const res = await action();
       if (res.success) {
@@ -93,201 +96,180 @@ export default function PayrunDetailPage() {
         className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
-        Payruns / <span className="text-slate-900">{payrun.name}</span>
+        Payrun / <span className="text-slate-900">{payrun.name}</span>
       </button>
 
-      {actionSuccess && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2.5 text-xs text-emerald-800 flex justify-between items-center">
-          <div className="flex items-center gap-2 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>{actionSuccess}</span>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5 sm:space-y-6">
+        {actionSuccess && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-xs text-emerald-800 flex justify-between items-center">
+            <div className="flex items-center gap-2 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{actionSuccess}</span>
+            </div>
+            <button onClick={() => setActionSuccess(null)} className="text-emerald-700 hover:text-emerald-900 font-bold">×</button>
           </div>
-          <button onClick={() => setActionSuccess(null)} className="text-emerald-700 hover:text-emerald-900 font-bold">×</button>
+        )}
+        {actionError && (
+          <div className="bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 text-xs text-rose-800 flex justify-between items-center">
+            <div className="flex items-center gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{actionError}</span>
+            </div>
+            <button onClick={() => setActionError(null)} className="text-rose-700 hover:text-rose-900 font-bold">×</button>
+          </div>
+        )}
+        {notice && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-800 flex justify-between items-center">
+            <div className="flex items-center gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>{notice}</span>
+            </div>
+            <button onClick={() => setNotice(null)} className="text-amber-700 hover:text-amber-900 font-bold">×</button>
+          </div>
+        )}
+
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">Payrun / {payrun.name}</h1>
+          <p className="text-xs text-slate-500">Open one Payrun to compute and manage its payslips.</p>
         </div>
-      )}
-      {actionError && (
-        <div className="bg-rose-50 border border-rose-200 rounded-2xl px-4 py-2.5 text-xs text-rose-800 flex justify-between items-center">
-          <div className="flex items-center gap-2 font-medium">
-            <AlertCircle className="w-4 h-4 text-rose-600" />
-            <span>{actionError}</span>
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              onClick={() => runAction(() => api.post(`/payroll/payruns/${payrun.id}/compute`), 'Payslips computed from current contracts and rules.')}
+              disabled={isBusy || payrun.status === 'PAID'}
+              size="sm"
+              className={
+                payrun.status === 'DRAFT' || payrun.status === 'COMPUTED'
+                  ? 'rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold'
+                  : 'rounded-xl text-xs font-semibold'
+              }
+              variant={payrun.status === 'DRAFT' || payrun.status === 'COMPUTED' ? undefined : 'outline'}
+            >
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Compute
+            </Button>
+            <Button
+              onClick={() => runAction(() => api.post(`/payroll/payruns/${payrun.id}/validate`), 'Payrun validated and locked for disbursement.')}
+              disabled={isBusy || payrun.status !== 'COMPUTED'}
+              size="sm"
+              variant="outline"
+              className="rounded-xl text-xs font-semibold"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Validate
+            </Button>
+            <Button
+              onClick={() => runAction(() => api.post(`/payroll/payruns/${payrun.id}/pay`), 'Payrun marked as PAID.')}
+              disabled={isBusy || payrun.status !== 'VALIDATED'}
+              size="sm"
+              variant="outline"
+              className="rounded-xl text-xs font-semibold"
+            >
+              <DollarSign className="w-3.5 h-3.5 mr-1.5" /> Mark Paid
+            </Button>
           </div>
-          <button onClick={() => setActionError(null)} className="text-rose-700 hover:text-rose-900 font-bold">×</button>
+
+          <Button
+            onClick={() => setNotice('Sending payslips to employees isn’t wired up yet — this app has no email delivery configured. Payslips can be shared via the PDF link on each row for now.')}
+            size="sm"
+            className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shrink-0"
+          >
+            <Send className="w-3.5 h-3.5 mr-1.5" /> Send Payslips
+          </Button>
         </div>
-      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <div className="text-xs text-slate-400 font-medium">Payrun Name</div>
-              <div className="text-base font-bold text-slate-900">{payrun.name}</div>
-            </div>
-            <StatusBadge status={payrun.status} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-400 font-medium">Name</Label>
+            <Input disabled value={payrun.name} className="rounded-xl border-slate-200 disabled:opacity-100 disabled:bg-slate-50 disabled:text-slate-700" />
           </div>
-
-          <div className="grid grid-cols-3 gap-2 text-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <div>
-              <div className="text-[10px] text-slate-400 uppercase font-semibold">Total Gross</div>
-              <div className="text-sm font-bold text-slate-900">${payrun.totalGross.toLocaleString()}</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-slate-400 uppercase font-semibold">Deductions</div>
-              <div className="text-sm font-bold text-rose-600">-${payrun.totalDeductions.toLocaleString()}</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-slate-400 uppercase font-semibold">Total Net</div>
-              <div className="text-sm font-bold text-blue-600">${payrun.totalNet.toLocaleString()}</div>
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-400 font-medium">Salary Structure</Label>
+            <Input disabled value={payrun.salaryStructure.name} className="rounded-xl border-slate-200 disabled:opacity-100 disabled:bg-slate-50 disabled:text-slate-700" />
           </div>
-
-          <div className="space-y-2 pt-2">
-            {(payrun.status === 'COMPUTED' || payrun.status === 'VALIDATED') && (
-              <Button
-                onClick={() => runAction(() => api.post(`/payroll/payruns/${payrun.id}/compute`), 'Payslips recomputed from current contracts and rules.')}
-                disabled={isBusy}
-                variant="outline"
-                className="w-full rounded-xl text-xs h-10 font-semibold"
-              >
-                <RefreshCw className="w-4 h-4 mr-1.5" /> Recompute
-              </Button>
-            )}
-            {payrun.status === 'COMPUTED' && (
-              <Button
-                onClick={() => runAction(() => api.post(`/payroll/payruns/${payrun.id}/validate`), 'Payrun validated and locked for disbursement!')}
-                disabled={isBusy}
-                className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs h-10 font-semibold"
-              >
-                <CheckCircle2 className="w-4 h-4 mr-1.5" /> Validate & Lock Payrun
-              </Button>
-            )}
-            {payrun.status === 'VALIDATED' && (
-              <Button
-                onClick={() => runAction(() => api.post(`/payroll/payruns/${payrun.id}/pay`), 'Payrun marked as PAID!')}
-                disabled={isBusy}
-                className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-10 font-semibold shadow-md shadow-emerald-500/20"
-              >
-                <DollarSign className="w-4 h-4 mr-1.5" /> Mark Batch as PAID
-              </Button>
-            )}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-400 font-medium">Period</Label>
+            <Input
+              disabled
+              value={`${formatDate(payrun.periodStartDate)} — ${formatDate(payrun.periodEndDate)}`}
+              className="rounded-xl border-slate-200 disabled:opacity-100 disabled:bg-slate-50 disabled:text-slate-700"
+            />
           </div>
-
-          <div className="space-y-2 pt-3 border-t border-slate-100">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Generated Payslips ({payrun.payslips.length})
-            </div>
-            <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
-              {payrun.payslips.length === 0 ? (
-                <div className="text-xs text-slate-400 text-center py-6">No payslips generated yet.</div>
-              ) : (
-                payrun.payslips.map((slip) => (
-                  <div
-                    key={slip.id}
-                    onClick={() => setSelectedPayslip(slip)}
-                    className={`p-3 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between ${
-                      selectedPayslip?.id === slip.id
-                        ? 'bg-blue-50/60 border-blue-400 text-blue-950 font-semibold'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
-                    }`}
-                  >
-                    <div>
-                      <div>{slip.employee.firstName} {slip.employee.lastName}</div>
-                      <div className="text-[10px] text-slate-400 font-normal">{slip.employee.department}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-slate-900">${slip.netPay.toLocaleString()}</div>
-                      <div className="text-[10px] text-slate-400">Net Pay</div>
-                    </div>
-                  </div>
-                ))
-              )}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-400 font-medium">Status</Label>
+            <div className="flex h-10 items-center">
+              <StatusBadge status={payrun.status} />
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-          {selectedPayslip ? (
-            <>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-slate-100 gap-2">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    Payslip: {selectedPayslip.employee.firstName} {selectedPayslip.employee.lastName}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Employee ID: {selectedPayslip.employee.employeeCode} • Position: {selectedPayslip.employee.jobPosition}
-                  </p>
-                </div>
-                <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-semibold">
-                  Contract Base: ${selectedPayslip.basicWage.toLocaleString()}
-                </span>
-              </div>
+        <div className="space-y-2 pt-2 border-t border-slate-100">
+          <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+            Payslips in this Payrun ({payrun.payslips.length})
+          </div>
 
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
-                      <tr>
-                        <th className="p-3">Sequence</th>
-                        <th className="p-3">Rule Name</th>
-                        <th className="p-3">Category</th>
-                        <th className="p-3 text-right">Computed Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {selectedPayslip.lineItems.map((item, idx) => (
-                        <tr
-                          key={idx}
-                          className={
-                            item.category === 'GROSS'
-                              ? 'bg-slate-50/80 font-bold text-slate-900'
-                              : item.category === 'NET'
-                              ? 'bg-blue-50/50 font-bold text-blue-900'
-                              : item.category === 'DEDUCTION'
-                              ? 'text-rose-600'
-                              : 'text-slate-700'
-                          }
-                        >
-                          <td className="p-3 text-slate-400 font-mono">{idx + 1}</td>
-                          <td className="p-3 font-medium">{item.name} ({item.ruleCode})</td>
-                          <td className="p-3">
-                            <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                                item.category === 'BASIC'
-                                  ? 'bg-slate-100 text-slate-700'
-                                  : item.category === 'ALLOWANCE'
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : item.category === 'DEDUCTION'
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}
-                            >
-                              {item.category}
-                            </span>
-                          </td>
-                          <td className="p-3 text-right font-mono font-semibold">${item.amount.toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 rounded-2xl text-white flex justify-between items-center shadow-lg shadow-blue-500/10">
-                <div>
-                  <div className="text-xs font-medium text-blue-100">Final Net Disbursement</div>
-                  <div className="text-2xl font-black">${selectedPayslip.netPay.toLocaleString()}</div>
-                </div>
-                <div className="text-right text-xs text-blue-100">
-                  <div>Bank: {selectedPayslip.employee.bankName || 'Missing'}</div>
-                  <div>A/C: {selectedPayslip.employee.bankAccountNo || 'Missing'}</div>
-                </div>
-              </div>
-            </>
+          {payrun.payslips.length === 0 ? (
+            <div className="text-xs text-slate-400 text-center py-10 bg-slate-50 rounded-xl border border-slate-100">
+              No payslips generated yet — run Compute to generate them from current contracts.
+            </div>
           ) : (
-            <div className="p-12 text-center text-slate-400 text-xs">
-              No payslips yet. Generate payslips to view the rule-driven computation breakdown.
+            <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
+                    <tr>
+                      <th className="p-3">Employee</th>
+                      <th className="p-3">Warning</th>
+                      <th className="p-3">Worked</th>
+                      <th className="p-3">Basic</th>
+                      <th className="p-3">Gross</th>
+                      <th className="p-3">Net</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-right">PDF</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {payrun.payslips.map((slip) => {
+                      const warning = shortWarningLabel(slip.warnings);
+                      return (
+                        <tr key={slip.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="p-3 font-semibold text-slate-900">
+                            {slip.employee.firstName} {slip.employee.lastName}
+                          </td>
+                          <td className="p-3">
+                            {warning ? (
+                              <span className="text-amber-600 font-semibold">{warning}</span>
+                            ) : (
+                              <span className="text-slate-300">—</span>
+                            )}
+                          </td>
+                          <td className="p-3 text-slate-600">{slip.workedDays}</td>
+                          <td className="p-3 text-slate-600">${slip.basicWage.toLocaleString()}</td>
+                          <td className="p-3 text-slate-600">${slip.grossPay.toLocaleString()}</td>
+                          <td className="p-3 font-semibold text-slate-900">${slip.netPay.toLocaleString()}</td>
+                          <td className="p-3">
+                            <StatusBadge status={slip.status} />
+                          </td>
+                          <td className="p-3 text-right">
+                            <Link
+                              href={`/dashboard/payroll/payslips/${slip.id}`}
+                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold"
+                            >
+                              <FileText className="w-3.5 h-3.5" /> PDF
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
+
+        <p className="text-xs text-slate-400">
+          Useful note: warnings such as missing account data or duplicate payslips should be visible before payroll is finalized.
+        </p>
       </div>
     </div>
   );

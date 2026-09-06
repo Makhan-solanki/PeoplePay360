@@ -59,7 +59,8 @@ model User {
   role                   Role             @default(EMPLOYEE)
   refreshToken           String?
   employee               Employee?
-  decidedTimeOffRequests TimeOffRequest[] @relation("TimeOffDecidedBy")
+  decidedTimeOffRequests TimeOffRequest[]    @relation("TimeOffDecidedBy")
+  decidedAllocations     TimeOffAllocation[] @relation("AllocationDecidedBy")
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
 
@@ -184,16 +185,20 @@ model TimeOffType {
 }
 
 model TimeOffAllocation {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
   employeeId    String
-  employee      Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee      Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   timeOffTypeId String
-  timeOffType   TimeOffType @relation(fields: [timeOffTypeId], references: [id])
+  timeOffType   TimeOffType   @relation(fields: [timeOffTypeId], references: [id])
   year          Int
   allocatedDays Float
-  usedDays      Float       @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  usedDays      Float         @default(0)
+  status        TimeOffStatus @default(APPROVED)
+  decidedById   String?
+  decidedBy     User?         @relation("AllocationDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@unique([employeeId, timeOffTypeId, year])
   @@map("time_off_allocations")

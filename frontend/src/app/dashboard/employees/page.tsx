@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { EmployeeAvatar } from '@/components/employees/employee-avatar';
 import { EmployeeFormModal } from '@/components/employees/employee-form-modal';
@@ -24,10 +24,11 @@ interface Employee {
 
 export default function EmployeesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const loadEmployees = async () => {
@@ -58,22 +59,21 @@ export default function EmployeesPage() {
     <div className="w-full p-4 sm:p-6 space-y-5 sm:space-y-6">
       {/* Header */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">Employees</h1>
-            <p className="text-xs text-slate-500">Employee master directory — department, position & status overview.</p>
-          </div>
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">Employees</h1>
+          <p className="text-xs text-slate-500">Employee master directory — department, position & status overview.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Button
             onClick={() => setShowCreateModal(true)}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 self-start sm:self-auto"
+            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
           </Button>
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
@@ -83,7 +83,8 @@ export default function EmployeesPage() {
               className="pl-9 rounded-xl border-slate-200 h-10"
             />
           </div>
-          <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 self-start sm:self-auto">
+
+          <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shrink-0 self-start sm:self-auto">
             <button
               onClick={() => setView('kanban')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${

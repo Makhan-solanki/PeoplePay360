@@ -108,3 +108,21 @@ export async function createAllocation(req: Request, res: Response, next: NextFu
     next(error);
   }
 }
+
+export async function approveAllocation(req: Request, res: Response, next: NextFunction) {
+  try {
+    const allocation = await timeOffService.decideAllocation(req.params.id, req.user!.id, 'APPROVED');
+    res.status(200).json({ success: true, data: allocation });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function rejectAllocation(req: Request, res: Response, next: NextFunction) {
+  try {
+    const allocation = await timeOffService.decideAllocation(req.params.id, req.user!.id, 'REJECTED');
+    res.status(200).json({ success: true, data: allocation });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -26,6 +26,7 @@ interface AllocationRow {
   allocatedDays: number;
   usedDays: number;
   year: number;
+  status: string;
   timeOffType: { id: string; name: string };
 }
 
@@ -81,30 +82,31 @@ export default function AllocationsPage() {
   return (
     <div className="w-full p-4 sm:p-6 space-y-5 sm:space-y-6">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">Allocations</h1>
-            <p className="text-xs text-slate-500">List view opened from Time Off ▼ → Allocations.</p>
-          </div>
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">Allocations</h1>
+          <p className="text-xs text-slate-500">List view opened from Time Off ▼ → Allocations.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Button
             onClick={() => setShowCreateModal(true)}
             disabled={types.length === 0}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 self-start sm:self-auto"
+            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
           </Button>
-        </div>
 
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search allocations..."
-            className="pl-9 rounded-xl border-slate-200 h-10"
-          />
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search allocations..."
+              className="pl-9 rounded-xl border-slate-200 h-10"
+            />
+          </div>
         </div>
       </div>
 
@@ -145,7 +147,7 @@ export default function AllocationsPage() {
                     <td className="p-3 text-slate-600">{a.usedDays} days</td>
                     <td className="p-3 font-semibold text-blue-600">{a.allocatedDays - a.usedDays} days</td>
                     <td className="p-3 text-right">
-                      <StatusBadge status="APPROVED" />
+                      <StatusBadge status={a.status} />
                     </td>
                   </tr>
                 ))}

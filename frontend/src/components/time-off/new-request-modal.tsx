@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmployeeSelect } from '@/components/shared/employee-select';
 import { api } from '@/lib/api';
 
 interface EmployeeOption {
@@ -46,7 +47,10 @@ export function NewRequestModal({ employees, types, onClose, onCreated }: NewReq
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!employeeId || !timeOffTypeId || !startDate || !endDate || totalDays <= 0) return;
+    if (!employeeId || !timeOffTypeId || !startDate || !endDate || totalDays <= 0) {
+      setError('Select an employee, a time off type, and a valid date range.');
+      return;
+    }
     setError(null);
     setIsSubmitting(true);
     try {
@@ -87,19 +91,7 @@ export function NewRequestModal({ employees, types, onClose, onCreated }: NewReq
 
           <div className="space-y-1.5">
             <Label>Employee</Label>
-            <select
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              required
-              className="flex h-10 w-full rounded-xl border border-slate-200 bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">Select employee…</option>
-              {employees.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.firstName} {e.lastName}
-                </option>
-              ))}
-            </select>
+            <EmployeeSelect employees={employees} value={employeeId} onChange={setEmployeeId} />
           </div>
 
           <div className="space-y-1.5">

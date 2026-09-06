@@ -110,22 +110,21 @@ export default function PayslipsPage() {
       )}
 
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">Payslips</h1>
-            <p className="text-xs text-slate-500">List view of employee payslips.</p>
-          </div>
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">Payslips</h1>
+          <p className="text-xs text-slate-500">List view of employee payslips.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <Button
             onClick={() => setNotice('Payslips are generated from a Payrun — create one from Payroll ▶ Payruns.')}
             size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 self-start sm:self-auto"
+            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
             <span>New</span>
           </Button>
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <Input

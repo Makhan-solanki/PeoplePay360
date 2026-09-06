@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { Button } from '@/components/ui/button';
 import { AttendanceWidget } from '@/components/shared/attendance-widget';
+import { RoleBadge } from '@/components/shared/role-badge';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -19,7 +19,6 @@ import {
   Clock,
   Calendar,
   DollarSign,
-  LogOut,
   Menu,
   X,
 } from 'lucide-react';
@@ -42,6 +41,8 @@ const NAV_GROUPS: (NavGroup | { label: string; icon: React.ComponentType<{ class
     activePrefix: ['/dashboard/employees', '/dashboard/working-schedules'],
     items: [
       { label: 'All Employees', href: '/dashboard/employees' },
+      { label: 'Contracts', href: '/dashboard/contracts' },
+      { label: 'Departments', href: '/dashboard/employees/departments' },
       { label: 'Working Schedules', href: '/dashboard/working-schedules' },
     ],
   },
@@ -86,7 +87,7 @@ const NAV_GROUPS: (NavGroup | { label: string; icon: React.ComponentType<{ class
 ];
 
 export function AppTopbar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -99,8 +100,8 @@ export function AppTopbar() {
 
   return (
     <header className="bg-white border-b border-slate-200/80 sticky top-0 z-30">
-      <div className="h-16 px-3 sm:px-6 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1 min-w-0">
+      <div className="h-16 px-3 sm:px-6 flex items-center gap-2">
+        <div className="flex items-center gap-1 min-w-0 shrink-0">
           <button
             onClick={() => setMobileOpen((o) => !o)}
             className="md:hidden shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100"
@@ -109,22 +110,10 @@ export function AppTopbar() {
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <Link href="/dashboard/employees" className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-              <div className="grid grid-cols-2 gap-1 p-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-200"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-              </div>
-            </div>
-            <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 truncate">
-              People<span className="text-blue-600">Pay360</span>
-            </span>
-          </Link>
+          <RoleBadge />
         </div>
 
-        <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shrink-0">
+        <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shrink-0 ml-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -143,6 +132,12 @@ export function AppTopbar() {
             <DropdownMenuContent align="start">
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/employees">All Employees</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/contracts">Contracts</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/employees/departments">Departments</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/working-schedules">Working Schedules</Link>
@@ -246,15 +241,8 @@ export function AppTopbar() {
           </DropdownMenu>
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 ml-auto">
           <AttendanceWidget />
-          <div className="text-right hidden lg:block">
-            <div className="text-xs font-semibold text-slate-900 truncate max-w-[160px]">{user?.email}</div>
-            <div className="text-[10px] text-blue-600 font-medium">{user?.role}</div>
-          </div>
-          <Button variant="ghost" size="sm" onClick={logout} className="rounded-xl text-slate-500 hover:text-slate-900 px-2 sm:px-3">
-            <LogOut className="w-4 h-4" />
-          </Button>
         </div>
       </div>
 

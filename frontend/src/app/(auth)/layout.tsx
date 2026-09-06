@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Navbar } from '@/components/layout/navbar';
+import { AuthNavbarGate } from '@/components/layout/auth-navbar-gate';
 
 export const metadata: Metadata = {
   title: 'Login — Hackathon 2026',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <AuthNavbarGate />
       <main className="flex-1 flex items-center justify-center p-4">
         {children}
       </main>

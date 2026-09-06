@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { EmployeeSelect } from '@/components/shared/employee-select';
 import { api } from '@/lib/api';
 
 interface EmployeeOption {
@@ -59,21 +60,8 @@ export function CheckInModal({ employees, onClose, onCheckedIn }: CheckInModalPr
           )}
 
           <div className="space-y-1.5">
-            <Label htmlFor="checkin-employee">Employee</Label>
-            <select
-              id="checkin-employee"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              required
-              className="flex h-10 w-full rounded-xl border border-slate-200 bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">Select employee…</option>
-              {employees.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.firstName} {e.lastName} — {e.department}
-                </option>
-              ))}
-            </select>
+            <Label>Employee</Label>
+            <EmployeeSelect employees={employees} value={employeeId} onChange={setEmployeeId} />
           </div>
 
           <p className="text-[11px] text-slate-400">

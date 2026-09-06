@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,8 @@ function todayIso() {
 
 export default function AttendancePage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const canCheckInOthers = user?.role === 'HR_MANAGER' || user?.role === 'HR_PAYROLL_MANAGER';
   const searchParams = useSearchParams();
   const employeeIdFilter = searchParams.get('employeeId');
 
@@ -89,22 +92,23 @@ export default function AttendancePage() {
   return (
     <div className="w-full p-4 sm:p-6 space-y-5 sm:space-y-6">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">Attendance</h1>
-            <p className="text-xs text-slate-500">List view of employee attendance records.</p>
-          </div>
-          <Button
-            onClick={() => setShowCheckInModal(true)}
-            size="sm"
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 self-start sm:self-auto"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>New</span>
-          </Button>
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">Attendance</h1>
+          <p className="text-xs text-slate-500">List view of employee attendance records.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          {canCheckInOthers && (
+            <Button
+              onClick={() => setShowCheckInModal(true)}
+              size="sm"
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 shrink-0 self-start sm:self-auto"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>New</span>
+            </Button>
+          )}
+
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <Input

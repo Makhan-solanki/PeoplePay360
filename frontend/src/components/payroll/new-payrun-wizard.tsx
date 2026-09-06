@@ -48,15 +48,24 @@ export function NewPayrunWizard({ salaryStructures, onClose, onCreated }: NewPay
   // fetched here (a read, no side effect) purely to populate step 2's picker.
   const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!salaryStructureId || !periodStart || !periodEnd) return;
+    if (!salaryStructureId || !periodStart || !periodEnd) {
+      setError('Select a pay structure and both period dates to continue.');
+      return;
+    }
+    if (new Date(periodEnd) < new Date(periodStart)) {
+      setError('Period end date must be on or after the start date.');
+      return;
+    }
     setError(null);
     setIsLoadingEmployees(true);
     try {
       const empRes = await api.get<EmployeeOption[]>('/employees');
       if (empRes.success && empRes.data) {
         setEmployees(empRes.data.filter((e) => e.contracts && e.contracts.length > 0));
+        setStep(2);
+      } else {
+        setError(empRes.error || 'Could not load employees. Please try again.');
       }
-      setStep(2);
     } finally {
       setIsLoadingEmployees(false);
     }

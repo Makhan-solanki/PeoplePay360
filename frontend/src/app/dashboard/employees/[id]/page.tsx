@@ -164,16 +164,17 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="w-full p-4 sm:p-6 space-y-5 sm:space-y-6">
-      {/* Breadcrumb & actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <button
-          onClick={() => router.push('/dashboard/employees')}
-          className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Employee / <span className="text-slate-900">{employee.firstName} {employee.lastName}</span>
-        </button>
+      {/* Breadcrumb */}
+      <button
+        onClick={() => router.push('/dashboard/employees')}
+        className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        Employee / <span className="text-slate-900">{employee.firstName} {employee.lastName}</span>
+      </button>
 
+      {/* Actions & smart buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {isEditing ? (
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={cancelEdit} className="rounded-xl" disabled={isSaving}>
@@ -189,32 +190,31 @@ export default function EmployeeDetailPage() {
             </Button>
           </div>
         ) : (
-          <Button variant="outline" size="sm" onClick={startEdit} className="rounded-xl">
+          <Button variant="outline" size="sm" onClick={startEdit} className="rounded-xl self-start sm:self-auto">
             <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
           </Button>
         )}
-      </div>
 
-      {/* Smart buttons */}
-      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-        <SmartButton
-          label="Time Off"
-          count={employee.timeOffRequests?.length ?? 0}
-          active={panel === 'timeoff'}
-          onClick={() => setPanel(panel === 'timeoff' ? 'info' : 'timeoff')}
-        />
-        <SmartButton
-          label="Contracts"
-          count={employee.contracts?.length ?? 0}
-          active={panel === 'contracts'}
-          onClick={() => setPanel(panel === 'contracts' ? 'info' : 'contracts')}
-        />
-        <SmartButton
-          label="Attendance"
-          count={attendances.length}
-          active={panel === 'attendance'}
-          onClick={() => setPanel(panel === 'attendance' ? 'info' : 'attendance')}
-        />
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <SmartButton
+            label="Time Off"
+            count={employee.timeOffRequests?.length ?? 0}
+            active={panel === 'timeoff'}
+            onClick={() => setPanel(panel === 'timeoff' ? 'info' : 'timeoff')}
+          />
+          <SmartButton
+            label="Contracts"
+            count={employee.contracts?.length ?? 0}
+            active={panel === 'contracts'}
+            onClick={() => setPanel(panel === 'contracts' ? 'info' : 'contracts')}
+          />
+          <SmartButton
+            label="Attendance"
+            count={attendances.length}
+            active={panel === 'attendance'}
+            onClick={() => setPanel(panel === 'attendance' ? 'info' : 'attendance')}
+          />
+        </div>
       </div>
 
       {/* Profile header */}

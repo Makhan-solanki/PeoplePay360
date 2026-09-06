@@ -186,6 +186,11 @@ export async function updateAttendance(id: string, data: UpdateAttendanceInput) 
   });
 }
 
+export async function getOwnEmployeeId(userId: string): Promise<string | null> {
+  const employee = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  return employee?.id ?? null;
+}
+
 export async function getTodayAttendance(employeeId: string) {
   const todayStr = new Date().toISOString().split('T')[0];
   const dateObj = new Date(`${todayStr}T00:00:00.000Z`);

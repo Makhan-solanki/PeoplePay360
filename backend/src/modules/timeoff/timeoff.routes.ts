@@ -38,6 +38,18 @@ router.post(
   controller.createAllocation
 );
 
+router.patch(
+  '/allocations/:id/approve',
+  authorize(['HR_MANAGER', 'HR_PAYROLL_MANAGER']),
+  controller.approveAllocation
+);
+
+router.patch(
+  '/allocations/:id/reject',
+  authorize(['HR_MANAGER', 'HR_PAYROLL_MANAGER']),
+  controller.rejectAllocation
+);
+
 router.get('/requests', controller.listRequests);
 router.post('/requests', validate({ body: createTimeOffRequestSchema }), controller.submitRequest);
 

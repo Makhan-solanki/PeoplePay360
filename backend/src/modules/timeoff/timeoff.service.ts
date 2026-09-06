@@ -89,6 +89,37 @@ export async function getEmployeeAllocations(employeeId: string, year?: number) 
     },
     include: {
       timeOffType: true,
+      decidedBy: { select: { id: true, email: true, employee: { select: { firstName: true, lastName: true } } } },
+    },
+  });
+}
+
+/**
+ * Approve or refuse an allocation. Allocations take effect immediately on
+ * creation (see createAllocation), so this acts as a live status toggle/
+ * correction rather than a one-time PENDING gate — a REJECTED allocation no
+ * longer counts as available balance for new or approved time off requests.
+ */
+export async function decideAllocation(
+  allocationId: string,
+  decidedById: string,
+  decision: typeof TimeOffStatus.APPROVED | typeof TimeOffStatus.REJECTED
+) {
+  const allocation = await prisma.timeOffAllocation.findUnique({ where: { id: allocationId } });
+  if (!allocation) {
+    throw new NotFoundError(`Allocation '${allocationId}' not found`);
+  }
+
+  return prisma.timeOffAllocation.update({
+    where: { id: allocationId },
+    data: {
+      status: decision,
+      decidedById,
+      decidedAt: new Date(),
+    },
+    include: {
+      timeOffType: true,
+      decidedBy: { select: { id: true, email: true, employee: { select: { firstName: true, lastName: true } } } },
     },
   });
 }
@@ -134,7 +165,7 @@ export async function submitTimeOffRequest(data: CreateTimeOffRequestInput) {
 
   const year = start.getFullYear();
 
-  // Validate that allocation exists and has enough remaining days
+  // Validate that an approved allocation exists and has enough remaining days
   const allocation = await prisma.timeOffAllocation.findUnique({
     where: {
       employeeId_timeOffTypeId_year: {
@@ -145,8 +176,8 @@ export async function submitTimeOffRequest(data: CreateTimeOffRequestInput) {
     },
   });
 
-  if (!allocation) {
-    throw new BadRequestError(`No time off allocation found for this year (${year})`);
+  if (!allocation || allocation.status !== TimeOffStatus.APPROVED) {
+    throw new BadRequestError(`No approved time off allocation found for this year (${year})`);
   }
 
   const remaining = allocation.allocatedDays - allocation.usedDays;
@@ -204,8 +235,8 @@ export async function approveTimeOffRequest(requestId: string, decidedById: stri
       },
     });
 
-    if (!allocation) {
-      throw new BadRequestError('Leave allocation record not found for this period');
+    if (!allocation || allocation.status !== TimeOffStatus.APPROVED) {
+      throw new BadRequestError('No approved leave allocation record found for this period');
     }
 
     const remaining = allocation.allocatedDays - allocation.usedDays;

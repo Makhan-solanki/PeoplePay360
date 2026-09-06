@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Lock, Mail } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export function LoginForm() {
@@ -34,20 +34,11 @@ export function LoginForm() {
     }
   };
 
-  const handleQuickLogin = (roleEmail: string) => {
-    setEmail(roleEmail);
-    setPassword('Password123!');
-  };
-
   return (
-    <div className="w-full max-w-[440px] mx-auto bg-[#14171F] border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl text-slate-100 selection:bg-blue-500/20">
-      {/* Header matching Mockup 2 */}
+    <div className="w-full max-w-[440px] mx-auto bg-card border border-border rounded-3xl p-5 sm:p-8 shadow-2xl text-card-foreground">
       <div className="mb-6">
-        <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-          HR Portal
-        </div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">Welcome back</h2>
-        <p className="text-sm text-slate-400 mt-1">
+        <h2 className="text-2xl font-bold text-foreground tracking-tight">Welcome back</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           Sign in to continue to your workspace.
         </p>
       </div>
@@ -55,59 +46,58 @@ export function LoginForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div
-            className="flex items-center gap-2 bg-red-950/50 border border-red-800/80 text-red-300 text-xs p-3 rounded-xl"
+            className="flex items-center gap-2 bg-destructive/10 border border-destructive/30 text-destructive text-xs p-3 rounded-xl"
             role="alert"
             id="login-error"
           >
-            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="login-email" className="text-xs text-slate-300 font-medium">
+          <Label htmlFor="login-email" className="text-xs font-medium">
             Work Email
           </Label>
-          <div className="relative">
-            <Input
-              id="login-email"
-              type="email"
-              placeholder="name@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="bg-[#1C202B] border-slate-700/80 text-white placeholder:text-slate-500 rounded-xl h-11 focus-visible:ring-blue-500 focus-visible:border-blue-500"
-            />
-          </div>
+          <Input
+            id="login-email"
+            type="email"
+            placeholder="name@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className="rounded-xl h-11"
+          />
         </div>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="login-password" className="text-xs text-slate-300 font-medium">
+            <Label htmlFor="login-password" className="text-xs font-medium">
               Password
             </Label>
-            <span className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer">
+            <Link
+              href="/forgot-password"
+              className="text-xs text-primary hover:underline"
+            >
               Forgot password?
-            </span>
+            </Link>
           </div>
-          <div className="relative">
-            <Input
-              id="login-password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="bg-[#1C202B] border-slate-700/80 text-white placeholder:text-slate-500 rounded-xl h-11 focus-visible:ring-blue-500 focus-visible:border-blue-500"
-            />
-          </div>
+          <Input
+            id="login-password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            className="rounded-xl h-11"
+          />
         </div>
 
         <Button
           type="submit"
-          className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-md shadow-blue-600/30 mt-2 transition-all"
+          className="w-full h-11 rounded-xl mt-2"
           disabled={isLoading}
           id="login-submit"
         >
@@ -115,55 +105,13 @@ export function LoginForm() {
         </Button>
       </form>
 
-      {/* Note from Mockup 2 & 3 */}
-      <div className="mt-6 pt-5 border-t border-slate-800 text-center space-y-2">
-        <p className="text-xs text-slate-400">
+      <div className="mt-6 pt-5 border-t border-border text-center space-y-2">
+        <p className="text-xs text-muted-foreground">
           Accounts are created and provisioned by an administrator.
         </p>
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-muted-foreground/80">
           After sign-in, show only the modules and actions allowed by the user&apos;s assigned role.
         </p>
-      </div>
-
-      {/* ⚡ Demo Quick-Fill Profiles for Live Demo */}
-      <div className="mt-6 pt-4 border-t border-slate-800/60">
-        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">
-          Demo Test Accounts
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => handleQuickLogin('payroll@peoplepay360.com')}
-            className="text-left px-2.5 py-1.5 rounded-lg bg-[#1C202B] hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 transition-colors"
-          >
-            <span className="font-semibold text-blue-400 block">Payroll Manager</span>
-            payroll@peoplepay360.com
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickLogin('hr@peoplepay360.com')}
-            className="text-left px-2.5 py-1.5 rounded-lg bg-[#1C202B] hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 transition-colors"
-          >
-            <span className="font-semibold text-emerald-400 block">HR Manager</span>
-            hr@peoplepay360.com
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickLogin('john.doe@peoplepay360.com')}
-            className="text-left px-2.5 py-1.5 rounded-lg bg-[#1C202B] hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 transition-colors"
-          >
-            <span className="font-semibold text-amber-400 block">Employee (John)</span>
-            john.doe@peoplepay360.com
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickLogin('jane.smith@peoplepay360.com')}
-            className="text-left px-2.5 py-1.5 rounded-lg bg-[#1C202B] hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 transition-colors"
-          >
-            <span className="font-semibold text-purple-400 block">Employee (Jane)</span>
-            jane.smith@peoplepay360.com
-          </button>
-        </div>
       </div>
     </div>
   );
